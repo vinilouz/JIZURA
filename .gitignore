@@ -1,4 +1,6 @@
 scratch/
+projects/
+docs/handoff/
 __pycache__/
 *.pyc
 *.log

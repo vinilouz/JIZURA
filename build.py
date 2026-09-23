@@ -13,6 +13,7 @@ html = f'''<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>JIZURA 字面</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="description" content="Browser lyric-video composer: paste your lyrics and JIZURA builds a lyric-motion (text PV) video automatically, then exports MP4. 707 parts, processed entirely in your browser.">
 <link rel="canonical" href="https://852wa.github.io/JIZURA/">
 <meta property="og:type" content="website">

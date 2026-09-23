@@ -189,6 +189,7 @@ function drawTimeline() {
   const beats = S.plan.beats || [];
   x.fillStyle = '#3a3a44';
   for (const b of beats) { if (b > D) break; x.fillRect(Math.round(X(b)), h - 6 * dpr, 1, 6 * dpr); }
+  for (const d of (S.plan.downbeats || [])) { if (d > D) break; x.fillRect(Math.round(X(d)), h - 10 * dpr, 1, 10 * dpr); }
   const top = h * 0.3, bot = h - 8 * dpr;
   for (const cut of S.plan.cuts) {
     const x0 = X(cut.start), x1 = X(cut.end);

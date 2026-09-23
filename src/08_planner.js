@@ -180,9 +180,16 @@ J.plan = (project, audio) => {
     version: 1, generator: 'JIZURA', title, artist, W, H, fps: project.fps || 24,
     duration: tm.duration, styleKey: project.style, style: st, fx, seed: project.seed,
     lines: [], cuts: [], events: [], beats: audio && audio.beats ? audio.beats.slice() : [],
+    downbeats: audio && audio.downbeats ? audio.downbeats.slice() : [],
+    barLen: audio && audio.barLen ? audio.barLen : 0,
+    silences: audio && audio.silences ? audio.silences.slice() : [],
+    phases: audio && audio.phases ? audio.phases.slice() : [],
+    moments: audio && audio.moments ? audio.moments.slice() : [],
     hud: fx.hud === 'on' ? true : fx.hud === 'off' ? false : !!st.hud,
     keyBg: J.keyMode ? J.keyMode(project) : null,   // 'green' | 'black' | null — 合成用の背景
   };
+  plan.energy = audio && audio.energy ? audio.energy : null;
+  plan.energyRate = audio && audio.energyRate ? audio.energyRate : 0;
   const beats = plan.beats;
   const snap = (t) => {
     if (!beats.length || !(project.timing && project.timing.snap)) return t;
@@ -192,6 +199,8 @@ J.plan = (project, audio) => {
     for (const k of [lo - 1, lo]) if (k >= 0 && k < beats.length && Math.abs(beats[k] - t) < bd) { bd = Math.abs(beats[k] - t); best = beats[k]; }
     return best;
   };
+  const inSilence = t => plan.silences.some(z => t >= z[0] && t <= z[1]);
+  const allLrc = parsed.lines.length && parsed.lines.every(l => l.lrc != null);
   const history = [], bgHistory = [], fxHistory = [];
   let schemeIdx = 0;
   const nSchemes = st.schemes.length;
@@ -216,8 +225,11 @@ J.plan = (project, audio) => {
     const chunks = ln.manual || J.chunkText(ln.text);
     plan.lines[li].chunks = chunks;
     const L = J.lerp(1.3, 0.5, fx.density);
-    let nC = Math.round(D / L);
-    const maxC = chunks.length + (chunks.length >= 2 && D > 2.0 ? 1 : 0);
+    const ph = plan.phases.find(p => s >= p.start && s < p.end);
+    const L2 = ph ? (ph.loud ? L * 0.85 : L * 1.2) : L;
+    let nC = Math.round(D / L2);
+    // LRC timing is authoritative: the recap cut replays the whole line before its true moment, so it is dropped when every line carries a timestamp
+    const maxC = chunks.length + (chunks.length >= 2 && D > 2.0 && !allLrc ? 1 : 0);
     nC = J.clamp(nC, 1, Math.max(1, maxC));
     if (ov.single) nC = 1;
     // groups of chunks
@@ -273,7 +285,7 @@ J.plan = (project, audio) => {
       let trans = null, transP = {}, transDur = 0;
       const canTrans = prevCut && Math.abs(prevCut.end - cs) < 0.06 && prevCut.layout !== 'interlude' && dur > 0.5;
       if (canTrans) {
-        trans = ov.trans && J.TRANS[ov.trans] ? ov.trans : pickTrans(rng, st, en, fx, emph, history);
+        trans = ov.trans && J.TRANS[ov.trans] ? ov.trans : pickTrans(rng, st, en, fx, emph, history, cs, plan.moments);
         if (trans) {
           const TD = J.TRANS[trans];
           transDur = J.clamp(TD.dur || 0.35, 0.12, Math.min(0.6, dur * 0.45));
@@ -291,21 +303,24 @@ J.plan = (project, audio) => {
       const g = fx.glitch * (st.glitchBoost || 1);
       const fxOn = k2 => en.fx == null || en.fx[k2] !== false;
       const F = 1 / 24;
-      if (fxOn('chroma')) addEvent(cs, 'chroma', 1.4 + rng.range(0, 2) * fx.chroma + (emph ? 2.5 : 0), 0.25);
-      if (fxOn('slice') && rng.chance(g * 0.5 + (emph ? 0.3 : 0))) addEvent(cs, 'slice', 0.6 + rng.range(0, 0.8) * g + (emph ? 0.5 : 0), rng.pick([2, 3, 4]) * F);
-      if (fxOn('block') && rng.chance(g * 0.22)) addEvent(cs + rng.range(0, 0.05), 'block', 0.5 + g, rng.pick([2, 4]) * F);
-      if (fxOn('shake') && (emph || rng.chance(fx.motion * 0.18))) addEvent(cs, 'shake', (emph ? 1 : 0.5) * fx.motion, 0.3);
+      const eAt = plan.energy ? plan.energy[Math.min(plan.energy.length - 1, Math.max(0, Math.floor(cs * plan.energyRate)))] : null;
+      const ef = eAt != null ? 0.6 + 0.8 * eAt : 1;
+      const sil = inSilence(cs);
+      if (fxOn('chroma')) addEvent(cs, 'chroma', (1.4 + rng.range(0, 2) * fx.chroma + (emph ? 2.5 : 0)) * ef, 0.25);
+      if (fxOn('slice') && !sil && rng.chance(g * 0.5 + (emph ? 0.3 : 0))) addEvent(cs, 'slice', (0.6 + rng.range(0, 0.8) * g + (emph ? 0.5 : 0)) * ef, rng.pick([2, 3, 4]) * F);
+      if (fxOn('block') && !sil && rng.chance(g * 0.22)) addEvent(cs + rng.range(0, 0.05), 'block', (0.5 + g) * ef, rng.pick([2, 4]) * F);
+      if (fxOn('shake') && (emph || (!sil && rng.chance(fx.motion * 0.18)))) addEvent(cs, 'shake', (emph ? 1 : 0.5) * fx.motion * ef, 0.3);
       if (fxOn('flash') && fx.flash && (ln.impact && k === 0)) addEvent(cs, 'flash', 1, 3 * F);
-      if (fxOn('invert') && rng.chance(0.035 * g)) addEvent(cs, 'invert', 1, 2 * F);
-      if (fxOn('zoom') && (emph && rng.chance(0.6) || rng.chance(0.06 * fx.motion))) addEvent(cs, 'zoom', 0.7 + 0.5 * fx.motion, 0.22);
-      if (fxOn('mosaic') && rng.chance(0.04 * g)) addEvent(cs, 'mosaic', 1, 3 * F);
-      if (fxOn('slice') && dur > 0.8 && rng.chance(g * 0.4)) addEvent(cs + rng.range(0.35, 0.8) * dur, 'slice', 0.4 + g * 0.4, 2 * F);
+      if (fxOn('invert') && !sil && rng.chance(0.035 * g)) addEvent(cs, 'invert', 1, 2 * F);
+      if (fxOn('zoom') && (emph && rng.chance(0.6) || rng.chance(0.06 * fx.motion))) addEvent(cs, 'zoom', (0.7 + 0.5 * fx.motion) * ef, 0.22);
+      if (fxOn('mosaic') && !sil && rng.chance(0.04 * g)) addEvent(cs, 'mosaic', 1, 3 * F);
+      if (fxOn('slice') && dur > 0.8 && !sil && rng.chance(g * 0.4)) addEvent(cs + rng.range(0.35, 0.8) * dur, 'slice', 0.4 + g * 0.4, 2 * F);
       // the newer effect library: at most one per cut boundary (plus rare mid-cut accents)
       if (plan.cuts.length > 1 || k > 0 || li > 0) {
         const pick = pickFx(rng, st, en, fx, emph, fxHistory, 'edge');
-        if (pick) { const D2 = J.FXE[pick]; const d = (D2.dur || 4) * F; addEvent(cs - (D2.pre ? D2.pre * F : 0), pick, (D2.amp || 1) * (0.7 + 0.5 * g + (emph ? 0.3 : 0)), d); fxHistory.push(pick); }
+        if (pick) { const D2 = J.FXE[pick]; const d = (D2.dur || 4) * F; addEvent(cs - (D2.pre ? D2.pre * F : 0), pick, (D2.amp || 1) * (0.7 + 0.5 * g + (emph ? 0.3 : 0)) * ef, d); fxHistory.push(pick); }
       }
-      if (dur > 1.1) { const pick = pickFx(rng, st, en, fx, emph, fxHistory, 'mid'); if (pick) { const D2 = J.FXE[pick]; addEvent(cs + rng.range(0.4, 0.75) * dur, pick, (D2.amp || 1) * (0.5 + 0.4 * g), (D2.dur || 3) * F); } }
+      if (dur > 1.1 && !sil) { const pick = pickFx(rng, st, en, fx, emph, fxHistory, 'mid'); if (pick) { const D2 = J.FXE[pick]; addEvent(cs + rng.range(0.4, 0.75) * dur, pick, (D2.amp || 1) * (0.5 + 0.4 * g), (D2.dur || 3) * F); } }
     });
     // interlude in long gaps
     const nextStart = li < parsed.lines.length - 1 ? tm.starts[li + 1] : null;
@@ -314,11 +329,25 @@ J.plan = (project, audio) => {
       plan.cuts.push(makeCut({ text: title || '', lineText: '', line: li, start: visEnd, end: nextStart, layout: 'interlude', enter: 'blur', exit: 'blur', hold: 'still', inDur: 0.3, outDur: 0.3, params: J.LAYOUTS.interlude.plan(r2), decor: pickDecor(r2, st, en, Object.assign({}, fx, { decor: 1 }), 'interlude'), scheme: schemeIdx, seed: J.h(lineSeed, 405) }));
     }
   });
+  // mid-take beat accents: a strong beat jolts the frame even when no cut changes (instrumental runs, long holds)
+  const F = 1 / 24;
+  const fxOnB = k => en.fx == null || en.fx[k] !== false;
+  if (beats.length && (fxOnB('shake') || fxOnB('slice'))) {
+    const rngB = J.rng(J.h(project.seed, 777));
+    for (const bt of beats) {
+      if (bt < 0.3 || inSilence(bt)) continue;
+      if (plan.events.some(ev => Math.abs(ev.t - bt) < 0.12)) continue;
+      const isDown = plan.downbeats.some(d => Math.abs(d - bt) < 0.01);
+      const eAt = plan.energy ? plan.energy[Math.min(plan.energy.length - 1, Math.max(0, Math.floor(bt * plan.energyRate)))] : null;
+      const ef = eAt != null ? 0.6 + 0.8 * eAt : 1;
+      if (!rngB.chance((isDown ? 0.5 : 0.16) * (fx.motion + fx.glitch) * ef)) continue;
+      if (isDown || rngB.chance(0.5)) plan.events.push({ t: bt, type: 'shake', amp: (isDown ? 1 : 0.6) * ef, dur: 0.3 });
+      else plan.events.push({ t: bt, type: 'slice', amp: 0.5 + 0.5 * fx.glitch * ef, dur: 3 * F });
+    }
+  }
   plan.cuts.sort((a, b) => a.start - b.start);
   plan.cuts.forEach((c, i) => { c.index = i; });
   plan.events.sort((a, b) => a.t - b.t);
-  plan.energy = audio && audio.energy ? audio.energy : null;
-  plan.energyRate = audio && audio.energyRate ? audio.energyRate : 0;
   return plan;
 };
 
@@ -452,11 +481,14 @@ function pickCam(rng, st, en, fx, LD, emph, history) {
   });
   return cands.length ? rng.wpick(cands) : 'push';
 }
-function pickTrans(rng, st, en, fx, emph, history) {
+function pickTrans(rng, st, en, fx, emph, history, cs, moments) {
   if (!J.TRANS_ORDER.length) return null;
   if (!rng.chance(0.1 + 0.22 * (fx.motion ?? 0.7) + (emph ? 0.08 : 0))) return null;
   const cands = J.TRANS_ORDER.filter(k => en.trans && en.trans[k] !== false && J.TRANS[k])
     .map(k => [k, wkey(st.bias && st.bias.trans, k, J.TRANS[k].w ?? 1) * novelty(history, 'trans', k)]);
+  if (cs != null && moments && moments.length && moments.some(m => Math.abs(cs - m) < 0.3)) {
+    for (const c of cands) if (c[0] === 'whipPan' || c[0] === 'flashCross') c[1] *= 3;
+  }
   return cands.length ? rng.wpick(cands) : null;
 }
 // kind 'edge' = transition at a cut boundary, 'mid' = accent in the middle of a cut

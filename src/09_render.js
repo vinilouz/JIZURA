@@ -105,7 +105,7 @@ class Renderer {
     }
     const chroma = (fx.chroma ?? 0.7) * (st.ghost ?? 1) * (1 + spike + beatPulse);
     const step = Math.floor(tq / clock + 1e-6);
-    const beatInfo = plan.beats && plan.beats.length ? beatAt(plan.beats, tq) : null;
+    const beatInfo = plan.beats && plan.beats.length ? beatAt(plan.beats, tq, plan.downbeats, plan.barLen) : null;
     const energy = plan.energy ? plan.energy[Math.min(plan.energy.length - 1, Math.max(0, Math.floor(t * plan.energyRate)))] : null;
     // ---------- background graphic (per line) ----------
     if (!opt.transparent && !key && mainCut && mainCut.bg && mainCut.bg !== 'none' && J.BG[mainCut.bg]) {
@@ -396,13 +396,14 @@ class Renderer {
     ctx.restore();
   }
 }
-/* beat context at time t: time since the previous beat, beat length and index */
-function beatAt(beats, t) {
+/* beat context at time t: time since the previous beat, beat length, index and downbeat flag */
+function beatAt(beats, t, downbeats, barLen) {
   let lo = 0, hi = beats.length - 1, i = -1;
   while (lo <= hi) { const m = (lo + hi) >> 1; if (beats[m] <= t) { i = m; lo = m + 1; } else hi = m - 1; }
   if (i < 0) return null;
   const len = i + 1 < beats.length ? beats[i + 1] - beats[i] : (i > 0 ? beats[i] - beats[i - 1] : 0.5);
-  return { since: t - beats[i], len: Math.max(0.2, len), index: i };
+  const down = !!((downbeats || []).some(d => Math.abs(d - beats[i]) < 0.01) || (barLen > 0 && i % barLen === 0));
+  return { since: t - beats[i], len: Math.max(0.2, len), index: i, down };
 }
 function prevBeat(beats, t) {
   let lo = 0, hi = beats.length - 1, ans = null;

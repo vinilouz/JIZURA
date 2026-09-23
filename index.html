@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>JIZURA 字面</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="description" content="Browser lyric-video composer: paste your lyrics and JIZURA builds a lyric-motion (text PV) video automatically, then exports MP4. 707 parts, processed entirely in your browser.">
 <link rel="canonical" href="https://852wa.github.io/JIZURA/">
 <meta property="og:type" content="website">
@@ -3626,9 +3627,16 @@ J.plan = (project, audio) => {
     version: 1, generator: 'JIZURA', title, artist, W, H, fps: project.fps || 24,
     duration: tm.duration, styleKey: project.style, style: st, fx, seed: project.seed,
     lines: [], cuts: [], events: [], beats: audio && audio.beats ? audio.beats.slice() : [],
+    downbeats: audio && audio.downbeats ? audio.downbeats.slice() : [],
+    barLen: audio && audio.barLen ? audio.barLen : 0,
+    silences: audio && audio.silences ? audio.silences.slice() : [],
+    phases: audio && audio.phases ? audio.phases.slice() : [],
+    moments: audio && audio.moments ? audio.moments.slice() : [],
     hud: fx.hud === 'on' ? true : fx.hud === 'off' ? false : !!st.hud,
     keyBg: J.keyMode ? J.keyMode(project) : null,   // 'green' | 'black' | null — 合成用の背景
   };
+  plan.energy = audio && audio.energy ? audio.energy : null;
+  plan.energyRate = audio && audio.energyRate ? audio.energyRate : 0;
   const beats = plan.beats;
   const snap = (t) => {
     if (!beats.length || !(project.timing && project.timing.snap)) return t;
@@ -3638,6 +3646,8 @@ J.plan = (project, audio) => {
     for (const k of [lo - 1, lo]) if (k >= 0 && k < beats.length && Math.abs(beats[k] - t) < bd) { bd = Math.abs(beats[k] - t); best = beats[k]; }
     return best;
   };
+  const inSilence = t => plan.silences.some(z => t >= z[0] && t <= z[1]);
+  const allLrc = parsed.lines.length && parsed.lines.every(l => l.lrc != null);
   const history = [], bgHistory = [], fxHistory = [];
   let schemeIdx = 0;
   const nSchemes = st.schemes.length;
@@ -3662,8 +3672,11 @@ J.plan = (project, audio) => {
     const chunks = ln.manual || J.chunkText(ln.text);
     plan.lines[li].chunks = chunks;
     const L = J.lerp(1.3, 0.5, fx.density);
-    let nC = Math.round(D / L);
-    const maxC = chunks.length + (chunks.length >= 2 && D > 2.0 ? 1 : 0);
+    const ph = plan.phases.find(p => s >= p.start && s < p.end);
+    const L2 = ph ? (ph.loud ? L * 0.85 : L * 1.2) : L;
+    let nC = Math.round(D / L2);
+    // LRC timing is authoritative: the recap cut replays the whole line before its true moment, so it is dropped when every line carries a timestamp
+    const maxC = chunks.length + (chunks.length >= 2 && D > 2.0 && !allLrc ? 1 : 0);
     nC = J.clamp(nC, 1, Math.max(1, maxC));
     if (ov.single) nC = 1;
     // groups of chunks
@@ -3719,7 +3732,7 @@ J.plan = (project, audio) => {
       let trans = null, transP = {}, transDur = 0;
       const canTrans = prevCut && Math.abs(prevCut.end - cs) < 0.06 && prevCut.layout !== 'interlude' && dur > 0.5;
       if (canTrans) {
-        trans = ov.trans && J.TRANS[ov.trans] ? ov.trans : pickTrans(rng, st, en, fx, emph, history);
+        trans = ov.trans && J.TRANS[ov.trans] ? ov.trans : pickTrans(rng, st, en, fx, emph, history, cs, plan.moments);
         if (trans) {
           const TD = J.TRANS[trans];
           transDur = J.clamp(TD.dur || 0.35, 0.12, Math.min(0.6, dur * 0.45));
@@ -3737,21 +3750,24 @@ J.plan = (project, audio) => {
       const g = fx.glitch * (st.glitchBoost || 1);
       const fxOn = k2 => en.fx == null || en.fx[k2] !== false;
       const F = 1 / 24;
-      if (fxOn('chroma')) addEvent(cs, 'chroma', 1.4 + rng.range(0, 2) * fx.chroma + (emph ? 2.5 : 0), 0.25);
-      if (fxOn('slice') && rng.chance(g * 0.5 + (emph ? 0.3 : 0))) addEvent(cs, 'slice', 0.6 + rng.range(0, 0.8) * g + (emph ? 0.5 : 0), rng.pick([2, 3, 4]) * F);
-      if (fxOn('block') && rng.chance(g * 0.22)) addEvent(cs + rng.range(0, 0.05), 'block', 0.5 + g, rng.pick([2, 4]) * F);
-      if (fxOn('shake') && (emph || rng.chance(fx.motion * 0.18))) addEvent(cs, 'shake', (emph ? 1 : 0.5) * fx.motion, 0.3);
+      const eAt = plan.energy ? plan.energy[Math.min(plan.energy.length - 1, Math.max(0, Math.floor(cs * plan.energyRate)))] : null;
+      const ef = eAt != null ? 0.6 + 0.8 * eAt : 1;
+      const sil = inSilence(cs);
+      if (fxOn('chroma')) addEvent(cs, 'chroma', (1.4 + rng.range(0, 2) * fx.chroma + (emph ? 2.5 : 0)) * ef, 0.25);
+      if (fxOn('slice') && !sil && rng.chance(g * 0.5 + (emph ? 0.3 : 0))) addEvent(cs, 'slice', (0.6 + rng.range(0, 0.8) * g + (emph ? 0.5 : 0)) * ef, rng.pick([2, 3, 4]) * F);
+      if (fxOn('block') && !sil && rng.chance(g * 0.22)) addEvent(cs + rng.range(0, 0.05), 'block', (0.5 + g) * ef, rng.pick([2, 4]) * F);
+      if (fxOn('shake') && (emph || (!sil && rng.chance(fx.motion * 0.18)))) addEvent(cs, 'shake', (emph ? 1 : 0.5) * fx.motion * ef, 0.3);
       if (fxOn('flash') && fx.flash && (ln.impact && k === 0)) addEvent(cs, 'flash', 1, 3 * F);
-      if (fxOn('invert') && rng.chance(0.035 * g)) addEvent(cs, 'invert', 1, 2 * F);
-      if (fxOn('zoom') && (emph && rng.chance(0.6) || rng.chance(0.06 * fx.motion))) addEvent(cs, 'zoom', 0.7 + 0.5 * fx.motion, 0.22);
-      if (fxOn('mosaic') && rng.chance(0.04 * g)) addEvent(cs, 'mosaic', 1, 3 * F);
-      if (fxOn('slice') && dur > 0.8 && rng.chance(g * 0.4)) addEvent(cs + rng.range(0.35, 0.8) * dur, 'slice', 0.4 + g * 0.4, 2 * F);
+      if (fxOn('invert') && !sil && rng.chance(0.035 * g)) addEvent(cs, 'invert', 1, 2 * F);
+      if (fxOn('zoom') && (emph && rng.chance(0.6) || rng.chance(0.06 * fx.motion))) addEvent(cs, 'zoom', (0.7 + 0.5 * fx.motion) * ef, 0.22);
+      if (fxOn('mosaic') && !sil && rng.chance(0.04 * g)) addEvent(cs, 'mosaic', 1, 3 * F);
+      if (fxOn('slice') && dur > 0.8 && !sil && rng.chance(g * 0.4)) addEvent(cs + rng.range(0.35, 0.8) * dur, 'slice', 0.4 + g * 0.4, 2 * F);
       // the newer effect library: at most one per cut boundary (plus rare mid-cut accents)
       if (plan.cuts.length > 1 || k > 0 || li > 0) {
         const pick = pickFx(rng, st, en, fx, emph, fxHistory, 'edge');
-        if (pick) { const D2 = J.FXE[pick]; const d = (D2.dur || 4) * F; addEvent(cs - (D2.pre ? D2.pre * F : 0), pick, (D2.amp || 1) * (0.7 + 0.5 * g + (emph ? 0.3 : 0)), d); fxHistory.push(pick); }
+        if (pick) { const D2 = J.FXE[pick]; const d = (D2.dur || 4) * F; addEvent(cs - (D2.pre ? D2.pre * F : 0), pick, (D2.amp || 1) * (0.7 + 0.5 * g + (emph ? 0.3 : 0)) * ef, d); fxHistory.push(pick); }
       }
-      if (dur > 1.1) { const pick = pickFx(rng, st, en, fx, emph, fxHistory, 'mid'); if (pick) { const D2 = J.FXE[pick]; addEvent(cs + rng.range(0.4, 0.75) * dur, pick, (D2.amp || 1) * (0.5 + 0.4 * g), (D2.dur || 3) * F); } }
+      if (dur > 1.1 && !sil) { const pick = pickFx(rng, st, en, fx, emph, fxHistory, 'mid'); if (pick) { const D2 = J.FXE[pick]; addEvent(cs + rng.range(0.4, 0.75) * dur, pick, (D2.amp || 1) * (0.5 + 0.4 * g), (D2.dur || 3) * F); } }
     });
     // interlude in long gaps
     const nextStart = li < parsed.lines.length - 1 ? tm.starts[li + 1] : null;
@@ -3760,11 +3776,25 @@ J.plan = (project, audio) => {
       plan.cuts.push(makeCut({ text: title || '', lineText: '', line: li, start: visEnd, end: nextStart, layout: 'interlude', enter: 'blur', exit: 'blur', hold: 'still', inDur: 0.3, outDur: 0.3, params: J.LAYOUTS.interlude.plan(r2), decor: pickDecor(r2, st, en, Object.assign({}, fx, { decor: 1 }), 'interlude'), scheme: schemeIdx, seed: J.h(lineSeed, 405) }));
     }
   });
+  // mid-take beat accents: a strong beat jolts the frame even when no cut changes (instrumental runs, long holds)
+  const F = 1 / 24;
+  const fxOnB = k => en.fx == null || en.fx[k] !== false;
+  if (beats.length && (fxOnB('shake') || fxOnB('slice'))) {
+    const rngB = J.rng(J.h(project.seed, 777));
+    for (const bt of beats) {
+      if (bt < 0.3 || inSilence(bt)) continue;
+      if (plan.events.some(ev => Math.abs(ev.t - bt) < 0.12)) continue;
+      const isDown = plan.downbeats.some(d => Math.abs(d - bt) < 0.01);
+      const eAt = plan.energy ? plan.energy[Math.min(plan.energy.length - 1, Math.max(0, Math.floor(bt * plan.energyRate)))] : null;
+      const ef = eAt != null ? 0.6 + 0.8 * eAt : 1;
+      if (!rngB.chance((isDown ? 0.5 : 0.16) * (fx.motion + fx.glitch) * ef)) continue;
+      if (isDown || rngB.chance(0.5)) plan.events.push({ t: bt, type: 'shake', amp: (isDown ? 1 : 0.6) * ef, dur: 0.3 });
+      else plan.events.push({ t: bt, type: 'slice', amp: 0.5 + 0.5 * fx.glitch * ef, dur: 3 * F });
+    }
+  }
   plan.cuts.sort((a, b) => a.start - b.start);
   plan.cuts.forEach((c, i) => { c.index = i; });
   plan.events.sort((a, b) => a.t - b.t);
-  plan.energy = audio && audio.energy ? audio.energy : null;
-  plan.energyRate = audio && audio.energyRate ? audio.energyRate : 0;
   return plan;
 };
 
@@ -3898,11 +3928,14 @@ function pickCam(rng, st, en, fx, LD, emph, history) {
   });
   return cands.length ? rng.wpick(cands) : 'push';
 }
-function pickTrans(rng, st, en, fx, emph, history) {
+function pickTrans(rng, st, en, fx, emph, history, cs, moments) {
   if (!J.TRANS_ORDER.length) return null;
   if (!rng.chance(0.1 + 0.22 * (fx.motion ?? 0.7) + (emph ? 0.08 : 0))) return null;
   const cands = J.TRANS_ORDER.filter(k => en.trans && en.trans[k] !== false && J.TRANS[k])
     .map(k => [k, wkey(st.bias && st.bias.trans, k, J.TRANS[k].w ?? 1) * novelty(history, 'trans', k)]);
+  if (cs != null && moments && moments.length && moments.some(m => Math.abs(cs - m) < 0.3)) {
+    for (const c of cands) if (c[0] === 'whipPan' || c[0] === 'flashCross') c[1] *= 3;
+  }
   return cands.length ? rng.wpick(cands) : null;
 }
 // kind 'edge' = transition at a cut boundary, 'mid' = accent in the middle of a cut
@@ -4136,7 +4169,7 @@ class Renderer {
     }
     const chroma = (fx.chroma ?? 0.7) * (st.ghost ?? 1) * (1 + spike + beatPulse);
     const step = Math.floor(tq / clock + 1e-6);
-    const beatInfo = plan.beats && plan.beats.length ? beatAt(plan.beats, tq) : null;
+    const beatInfo = plan.beats && plan.beats.length ? beatAt(plan.beats, tq, plan.downbeats, plan.barLen) : null;
     const energy = plan.energy ? plan.energy[Math.min(plan.energy.length - 1, Math.max(0, Math.floor(t * plan.energyRate)))] : null;
     // ---------- background graphic (per line) ----------
     if (!opt.transparent && !key && mainCut && mainCut.bg && mainCut.bg !== 'none' && J.BG[mainCut.bg]) {
@@ -4427,13 +4460,14 @@ class Renderer {
     ctx.restore();
   }
 }
-/* beat context at time t: time since the previous beat, beat length and index */
-function beatAt(beats, t) {
+/* beat context at time t: time since the previous beat, beat length, index and downbeat flag */
+function beatAt(beats, t, downbeats, barLen) {
   let lo = 0, hi = beats.length - 1, i = -1;
   while (lo <= hi) { const m = (lo + hi) >> 1; if (beats[m] <= t) { i = m; lo = m + 1; } else hi = m - 1; }
   if (i < 0) return null;
   const len = i + 1 < beats.length ? beats[i + 1] - beats[i] : (i > 0 ? beats[i] - beats[i - 1] : 0.5);
-  return { since: t - beats[i], len: Math.max(0.2, len), index: i };
+  const down = !!((downbeats || []).some(d => Math.abs(d - beats[i]) < 0.01) || (barLen > 0 && i % barLen === 0));
+  return { since: t - beats[i], len: Math.max(0.2, len), index: i, down };
 }
 function prevBeat(beats, t) {
   let lo = 0, hi = beats.length - 1, ans = null;
@@ -4510,9 +4544,77 @@ J.analyzeAudio = async (file) => {
   // waveform peaks for the timeline
   const bins = 1600, peaks = new Float32Array(bins), per = Math.max(1, Math.floor(len / bins));
   for (let b = 0; b < bins; b++) { let m = 0; for (let i = b * per, e = Math.min(len, (b + 1) * per); i < e; i += 4) { const v = Math.abs(mono[i]); if (v > m) m = v; } peaks[b] = m; }
+  // low band <150 Hz: one-pole lowpass → flux/onset over filtered signal
+  const TAU = 2 * Math.PI, aLow = 1 - Math.exp(-TAU * 150 / sr);
+  const lp = new Float32Array(len);
+  lp[0] = aLow * mono[0];
+  for (let i = 1; i < len; i++) lp[i] = lp[i - 1] + aLow * (mono[i] - lp[i - 1]);
+  const fluxLow = new Float32Array(n);
+  let prevLHP = 0, prevLX = 0;
+  for (let f = 0; f < n; f++) {
+    let eh = 0;
+    for (let i = f * hop, end = Math.min(len, (f + 1) * hop); i < end; i++) {
+      const x = lp[i]; const hp = 0.92 * (prevLHP + x - prevLX); prevLHP = hp; prevLX = x; eh += hp * hp;
+    }
+    fluxLow[f] = Math.sqrt(eh / hop);
+  }
+  const onsetLow = new Float32Array(n);
+  for (let f = 1; f < n; f++) {
+    const cur = Math.log(1e-4 + fluxLow[f]);
+    let m = 0, k = 0; for (let j = Math.max(0, f - 4); j < f; j++) { m += Math.log(1e-4 + fluxLow[j]); k++; }
+    onsetLow[f] = Math.max(0, cur - m / Math.max(1, k));
+  }
+  // bar length: candidates 2/3/4 scored on onsetLow at downbeat positions (beat 0, c, 2c…)
+  let barLen = 4, bestBar = -1, barTie = false;
+  for (const c of [2, 3, 4]) {
+    let s = 0;
+    for (let k = 0; k * c < beats.length; k++) { const fi = Math.round(beats[k * c] * rate); if (fi < n) s += onsetLow[fi]; }
+    if (s > bestBar) { bestBar = s; barLen = c; barTie = false; } else if (s === bestBar) barTie = true;
+  }
+  if (barTie) barLen = 4;
+  // downbeats: strongest low-band onset beat per bar
+  const downbeats = [];
+  for (let b = 0; b < beats.length; b += barLen) {
+    let bi = b, bv = -1;
+    for (let j = b; j < Math.min(beats.length, b + barLen); j++) { const fi = Math.round(beats[j] * rate); const v = fi < n ? onsetLow[fi] : -1; if (v > bv) { bv = v; bi = j; } }
+    downbeats.push(beats[bi]);
+  }
+  // silences: energyN < 0.15 sustained ≥ 0.8 s
+  const qMin = Math.round(0.8 * rate), silences = [];
+  let s0 = -1;
+  for (let f = 0; f <= n; f++) {
+    const quiet = f < n && energyN[f] < 0.15;
+    if (quiet && s0 < 0) s0 = f;
+    if (!quiet && s0 >= 0) { if (f - s0 >= qMin) silences.push([+(s0 / rate).toFixed(2), +(f / rate).toFixed(2)]); s0 = -1; }
+  }
+  // phases: 2 s moving average of energyN vs global mean × 1.1
+  const smW = rate * 2, smooth = new Float32Array(n);
+  let acc = 0;
+  for (let f = 0; f < n; f++) { acc += energyN[f]; if (f >= smW) acc -= energyN[f - smW]; smooth[f] = acc / Math.min(f + 1, smW); }
+  let mean = 0; for (let f = 0; f < n; f++) mean += smooth[f];
+  const thr = mean / Math.max(1, n) * 1.1;
+  const phases = [];
+  for (let f = 0; f < n; f++) {
+    const loud = smooth[f] >= thr, last = phases[phases.length - 1];
+    if (last && last.loud === loud) last.end = +((f + 1) / rate).toFixed(2);
+    else phases.push({ start: +(f / rate).toFixed(2), end: +((f + 1) / rate).toFixed(2), loud });
+  }
+  for (let i = phases.length - 1; i > 0; i--) if (phases[i].end - phases[i].start < 0.5) { phases[i - 1].end = phases[i].end; phases.splice(i, 1); }
+  if (phases.length > 1 && phases[0].end - phases[0].start < 0.5) { phases[1].start = phases[0].start; phases.splice(0, 1); }
+  // moments: positive 0.4 s deltas of smoothed energy, greedy ≥ 4 s apart
+  const dLag = Math.round(0.4 * rate), mGap = 4 * rate;
+  let maxD = 0;
+  for (let f = dLag; f < n; f++) { const d = smooth[f] - smooth[f - dLag]; if (d > maxD) maxD = d; }
+  const mCand = [];
+  for (let f = dLag; f < n; f++) { const d = smooth[f] - smooth[f - dLag]; if (d >= maxD * 0.5 && d >= 0.25) mCand.push([d, f]); }
+  mCand.sort((a, b) => b[0] - a[0]);
+  const mSel = [];
+  for (const [, f] of mCand) if (mSel.every(g => Math.abs(f - g) >= mGap)) mSel.push(f);
+  const moments = mSel.sort((a, b) => a - b).map(f => +(f / rate).toFixed(2));
   return {
     name: file.name, duration: audioBuffer.duration, sampleRate: sr, buffer: audioBuffer,
     bpm: Math.round(60 / period * 10) / 10, beats, energy: energyN, energyRate: rate, peaks,
+    downbeats, barLen, silences, phases, moments,
   };
 };
 
@@ -27356,7 +27458,8 @@ reg('cam', 'beatPunch', { name: '拍でズーム', nameEn: 'Beat zoom', tags: ['
     if (env.beat) { len = env.beat.len; since = env.beat.since - lagOf(env); if (since < 0) since += len; }
     else since = wrap(env.lt, 0.5);
     const k = Math.exp(-since * 9);
-    return { s: 1 + (P.a || 0.035) * KM(env) * k, y: -env.H * 0.004 * KM(env) * k };
+    const ka = (env.beat && env.beat.down) ? k * 1.5 : k;
+    return { s: 1 + (P.a || 0.035) * KM(env) * ka, y: -env.H * 0.004 * KM(env) * ka };
   } });
 
 reg('cam', 'whipIn', { name: 'ホイップイン', nameEn: 'Whip in', tags: ['pop', 'glitch', 'graphic'], w: 0.7, strong: true,
@@ -29423,6 +29526,7 @@ function drawTimeline() {
   const beats = S.plan.beats || [];
   x.fillStyle = '#3a3a44';
   for (const b of beats) { if (b > D) break; x.fillRect(Math.round(X(b)), h - 6 * dpr, 1, 6 * dpr); }
+  for (const d of (S.plan.downbeats || [])) { if (d > D) break; x.fillRect(Math.round(X(d)), h - 10 * dpr, 1, 10 * dpr); }
   const top = h * 0.3, bot = h - 8 * dpr;
   for (const cut of S.plan.cuts) {
     const x0 = X(cut.start), x1 = X(cut.end);

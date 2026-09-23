@@ -881,7 +881,8 @@ reg('cam', 'beatPunch', { name: '拍でズーム', nameEn: 'Beat zoom', tags: ['
     if (env.beat) { len = env.beat.len; since = env.beat.since - lagOf(env); if (since < 0) since += len; }
     else since = wrap(env.lt, 0.5);
     const k = Math.exp(-since * 9);
-    return { s: 1 + (P.a || 0.035) * KM(env) * k, y: -env.H * 0.004 * KM(env) * k };
+    const ka = (env.beat && env.beat.down) ? k * 1.5 : k;
+    return { s: 1 + (P.a || 0.035) * KM(env) * ka, y: -env.H * 0.004 * KM(env) * ka };
   } });
 
 reg('cam', 'whipIn', { name: 'ホイップイン', nameEn: 'Whip in', tags: ['pop', 'glitch', 'graphic'], w: 0.7, strong: true,
