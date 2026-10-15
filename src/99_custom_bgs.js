@@ -300,6 +300,11 @@ J.plan = (project, audio) => {
   try { return (lastPlan = plan(project, audio)); } finally { J.BG_ORDER.splice(i, 0, m); }
 };
 
+/* A layer above re-plans from a clone whose overrides are a fresh shallow copy,
+   so `current` would end on that clone and every write would miss the project
+   the editor re-plans from. The layer above hands the real one back. */
+J.bgLiveProject = project => { current = project; };
+
 /* Turning the technique on in the picker assigns it to nothing: the planner only
    reads ov.bg, and pickBg never reaches 'media'. Writing ov.bg is what applies
    it, so importing pictures applies them and this button re-applies. */

@@ -75,7 +75,11 @@ J.plan = (project, audio) => {
   const clone = Object.assign({}, project);
   clone.overrides = Object.assign({}, project.overrides);
   for (const k of Object.keys(cutTime)) clone.overrides[k] = Object.assign({}, clone.overrides[k], { cutTime: cutTime[k] });
-  return plan(clone, audio);
+  const out = plan(clone, audio);
+  // the clone is throwaway: hand the layer below back the project the editor plans from,
+  // or everything it writes into overrides lands on the clone and never reaches a cut
+  if (J.bgLiveProject) J.bgLiveProject(project);
+  return out;
 };
 
 })();

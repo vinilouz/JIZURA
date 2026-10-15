@@ -115,6 +115,24 @@ async () => {
 }
 """
 
+# With music the cut layer re-plans from a clone, so the background layer used
+# to end up holding that clone: every write into overrides missed the project the
+# editor re-plans from, and importing silently did nothing.
+APPLY_AUDIO = r"""
+async () => {
+  const onset = new Float32Array(600);
+  for (let f = 1; f < 600; f++) onset[f] = f % 20 === 0 ? 1 : 0.05;
+  const audio = { onset: onset, energyRate: 100, duration: 6, peaks: [], barLen: 4, downbeats: [], silences: [] };
+  const p = window.__p;
+  delete p.overrides[0];
+  J.plan(p, audio);
+  const n = J.bgApply();
+  const cuts = J.plan(p, audio).cuts;
+  return { lines: n, after: cuts.filter(c => c.bg === 'media').length, total: cuts.length,
+           ov0: (p.overrides[0] || {}).bg || null };
+}
+"""
+
 def fail(msg):
     print('FAIL:', msg)
     sys.exit(1)
@@ -134,6 +152,7 @@ async def main():
         setup = await pg.evaluate(SETUP)
         imported = await pg.evaluate(IMPORT)
         apply = await pg.evaluate(APPLY)
+        apply_audio = await pg.evaluate(APPLY_AUDIO)
         render = await pg.evaluate(RENDER)
         reorder = await pg.evaluate(REORDER)
         empty = await pg.evaluate(EMPTY)
@@ -142,6 +161,7 @@ async def main():
     print('setup   ', json.dumps(setup))
     print('import  ', json.dumps({k: imported[k] for k in ('order', 'forLine', 'idbName', 'idbSize', 'idbBlob', 'rows', 'count')}))
     print('apply   ', json.dumps(apply))
+    print('apply+au', json.dumps(apply_audio))
     print('reorder ', json.dumps(reorder))
     print('render  ', json.dumps(render))
     print('empty   ', json.dumps(empty))
@@ -171,6 +191,10 @@ async def main():
         fail('the randomiser must never pick the background media by itself: ' + json.dumps(apply))
     if apply['lines'] < 1 or apply['after'] != apply['total']:
         fail('J.bgApply did not reach every cut: ' + json.dumps(apply))
+    if apply_audio['ov0'] != 'media':
+        fail('the background write missed the project the editor re-plans from: ' + json.dumps(apply_audio))
+    if apply_audio['after'] != apply_audio['total']:
+        fail('the background did not survive re-planning with music: ' + json.dumps(apply_audio))
     hue = lambda px: ['r', 'g', 'b'][max(range(3), key=lambda i: px[i])]
     # red, green, then back to red: the rotation is the asset order, line by line
     if (hue(render['l0']), hue(render['l1']), hue(render['l3'])) != ('r', 'g', 'r'):
