@@ -10,10 +10,12 @@ git merge --no-edit upstream/main
 python3 build.py
 python3 build.py --dev
 
-# every local test, and the first failure stops the script
-for t in dev/*_test.py; do
-  echo "--- $t"
-  python3 "$t"
+# every local test, first failure stops the script.
+# Listed, not globbed: dev/build_test.py and dev/cep_test.py are upstream tools
+# that take arguments and need a local server, not tests.
+for t in beat audio onset bg; do
+  echo "--- dev/${t}_test.py"
+  python3 "dev/${t}_test.py"
 done
 
 echo
