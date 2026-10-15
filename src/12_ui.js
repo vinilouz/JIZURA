@@ -968,12 +968,27 @@ function renderColors() {
     keys.forEach(([k, label]) => {
       const l = document.createElement('label');
       const v = (c[flag] && c[k]) || c[k] || sc[k];
-      l.innerHTML = `${label}<input type="color" value="${toColorInput(v)}">`;
-      l.querySelector('input').addEventListener('input', e => {
-        c[k] = e.target.value.toUpperCase();
+      const sw = document.createElement('input');
+      sw.type = 'color'; sw.value = toColorInput(v);
+      const hx = document.createElement('input');
+      hx.type = 'text'; hx.className = 'hex'; hx.value = toHexText(v);
+      hx.spellcheck = false; hx.setAttribute('aria-label', label);
+      const commit = hex => {
+        const t = J.hex(hex);
+        c[k] = J.toHex(t[0], t[1], t[2]);
+        sw.value = toColorInput(c[k]);
+        if (hx.value !== c[k]) hx.value = c[k];
         if (!c[flag]) { c[flag] = true; $(flag === 'enabled' ? 'colorOn' : 'accentOn').checked = true; }
         replanSoon(60); drawSwatch();
+      };
+      hx.addEventListener('input', () => {
+        const h = hx.value.trim().replace(/^#?/, '#');
+        if (!/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(h)) return;
+        commit(h);
       });
+      hx.addEventListener('blur', () => { hx.value = toHexText(c[k] || sc[k]); });
+      sw.addEventListener('input', () => commit(sw.value));
+      l.append(sw, hx, document.createTextNode(label));
       row.appendChild(l);
     });
   };
@@ -982,6 +997,7 @@ function renderColors() {
   drawSwatch();
 }
 const toColorInput = v => { const h = String(v || '#000000'); return /^#[0-9a-f]{6}$/i.test(h) ? h.toLowerCase() : J.toHex(...J.hex(h)).toLowerCase(); };
+const toHexText = v => J.toHex(...J.hex(String(v || '#000000')));
 function swatchHTML(cols) { return cols.filter(c => /^#[0-9a-f]{3,8}$/i.test(String(c))).map(c => `<i style="background:${c}" title="${c}"></i>`).join(''); }
 function drawSwatch() {
   const sc = S.plan ? S.plan.style.schemes[0] : null; if (!sc) return;
