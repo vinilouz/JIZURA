@@ -31,8 +31,9 @@ const STR = {
     down: () => '下へ',
     note: () => '読み込んだ画像は「手法 → 背景」のセレクターと、カットごとの差し替えに出ます',
     loading: (k, n) => `読み込み中… ${k}/${n}`,
-    errType: n => `${n} は対応していません（画像: jpg / png / webp / gif）`,
+    errType: n => `${n} は対応していません（画像: jpg / png / webp / gif、動画: mp4 / mov（H.264））`,
     errDecode: n => `${n} を読み込めませんでした（壊れているか、対応しない形式です）`,
+    errWebM: n => `${n}: WebM は対応していません（EBML 形式の demux が必要です）。MP4 / mov（H.264）を使ってください`,
     errIdb: () => 'このブラウザではファイルを保存できません（プライベートモードなど）。再読み込みすると消えます',
     errPartial: (k, n) => `${n}点中 ${k}点を追加できませんでした`,
     added: n => `${n}点を追加しました`,
@@ -49,8 +50,9 @@ const STR = {
     down: () => 'Move down',
     note: () => 'Loaded images show up under Techniques → Background, and in the per-cut override picker.',
     loading: (k, n) => `Loading… ${k}/${n}`,
-    errType: n => `${n} is not supported (images: jpg / png / webp / gif).`,
+    errType: n => `${n} is not supported (images: jpg / png / webp / gif, video: mp4 / mov with H.264).`,
     errDecode: n => `Could not read ${n} (corrupt file or unsupported format).`,
+    errWebM: n => `${n}: WebM is not supported — it needs an EBML demuxer. Use MP4 or MOV with H.264.`,
     errIdb: () => 'This browser cannot store files (private mode?). Reloading will lose them.',
     errPartial: (k, n) => `Could not add ${k} of ${n}`,
     added: n => `Added ${n}`,
@@ -104,18 +106,38 @@ const need = () => {
 };
 const assets = () => (current && Array.isArray(current.bgAssets) ? current.bgAssets : []);
 
-const ACCEPTED = { 'image/jpeg': 1, 'image/png': 1, 'image/webp': 1, 'image/gif': 1 };
+const ACCEPTED = { 'image/jpeg': 1, 'image/png': 1, 'image/webp': 1, 'image/gif': 1, 'video/mp4': 1, 'video/quicktime': 1 };
+/* a rejected format gets named, not just listed among the accepted ones */
+const NAMED_TYPE = { 'video/webm': T.errWebM };
+const isVideo = a => a.type === 'video/mp4' || a.type === 'video/quicktime';
 
 /* decode + store one file; a rejection comes back as {name, why} and stays visible in the panel */
 const accept = async (file) => {
-  if (!ACCEPTED[file.type]) return { name: file.name, why: T.errType(file.name) };
+  if (!ACCEPTED[file.type]) return { name: file.name, why: (NAMED_TYPE[file.type] || T.errType)(file.name) };
+  const id = `bg${Date.now().toString(36)}${(seq++).toString(36)}`;
+  if (isVideo({ type: file.type })) {
+    // demux and configure the decoder now: an unsupported container or codec is
+    // named at import time instead of failing later inside the render
+    let info;
+    try {
+      info = await J.video.open(id, await file.arrayBuffer());
+    } catch (e) {
+      return { name: file.name, why: `${file.name}: ${e.message}` };
+    }
+    try {
+      await idbPut('bg:' + id, file);
+    } catch (e) {
+      J.video.drop(id);
+      return { name: file.name, why: T.errIdb() };
+    }
+    return { asset: { id, name: file.name, type: file.type, w: info.w, h: info.h, dur: info.dur } };
+  }
   let bmp;
   try {
     bmp = await createImageBitmap(file);
   } catch (e) {
     return { name: file.name, why: T.errDecode(file.name) };
   }
-  const id = `bg${Date.now().toString(36)}${(seq++).toString(36)}`;
   try {
     await idbPut('bg:' + id, file);
   } catch (e) {
@@ -144,7 +166,9 @@ J.bgImport = async (files, onStep) => {
 J.bgRemove = async (id) => {
   const list = need(), i = list.findIndex(a => a.id === id);
   if (i < 0) throw new Error(`99_custom_bgs: no background asset ${id}`);
+  const asset = list[i];
   list.splice(i, 1);
+  if (isVideo(asset)) J.video.drop(id);
   const bmp = decoded.get(id);
   if (bmp) bmp.close();
   decoded.delete(id);
@@ -175,7 +199,8 @@ J.bgRestore = async () => {
     if (decoded.has(a.id)) continue;
     const blob = await idbGet('bg:' + a.id);
     if (!blob) throw new Error(`99_custom_bgs: ${a.name} is missing from IndexedDB`);
-    decoded.set(a.id, await createImageBitmap(blob));
+    if (isVideo(a)) await J.video.open(a.id, await blob.arrayBuffer());
+    else decoded.set(a.id, await createImageBitmap(blob));
   }
 };
 
@@ -194,28 +219,38 @@ const drawMedia = env => {
   const cut = env.cut;
   if (!cut) throw new Error('99_custom_bgs: background media needs a cut to rotate over');
   const asset = J.bgForLine(cut.line);
-  const img = decoded.get(asset.id);
+  const vid = isVideo(asset);
+  const img = vid ? J.video.frame(asset.id, env.t) : decoded.get(asset.id);
   if (!img) throw new Error(`99_custom_bgs: ${asset.name} is not decoded yet`);
+  const rot = vid ? J.video.rotation(asset.id) : 0;
   const ctx = env.ctx, W = env.W, H = env.H, u = H / 1080;
-  const iw = img.width, ih = img.height;
+  const iw = vid ? img.displayWidth : img.width, ih = vid ? img.displayHeight : img.height;
   const down = isDownbeat(env);
   const pulse = env.beat && env.beat.since < 0.25 ? 0.9 * Math.exp(-env.beat.since * 16) : 0;
   const prog = J.clamp((env.t - cut.start) / Math.max(0.1, cut.dur));
   const zoom = 1 + 0.04 * prog + pulse * (down ? 0.045 : 0.022);
   const pan = (cut.seed % 2 === 0 ? 1 : -1);
   ctx.save();
-  if (iw < ih * 0.85) {
-    const s = Math.max(W / iw, H / ih) * 1.05;
+  try {
+  if (rot) {                                  // tkhd display matrix: phone videos are stored sideways
+    ctx.translate(W / 2, H / 2);
+    ctx.rotate(rot * Math.PI / 180);
+    ctx.translate(-W / 2, -H / 2);
+  }
+  if (rot % 180 === 0 ? iw < ih * 0.85 : ih < iw * 0.85) {
+    const dw0 = rot % 180 === 0 ? iw : ih, dh0 = rot % 180 === 0 ? ih : iw;
+    const s = Math.max(W / dw0, H / dh0) * 1.05;
     if ('filter' in ctx) ctx.filter = 'blur(26px) brightness(0.42)';
-    ctx.drawImage(img, (W - iw * s) / 2, (H - ih * s) / 2, iw * s, ih * s);
+    ctx.drawImage(img, (W - dw0 * s) / 2, (H - dh0 * s) / 2, dw0 * s, dh0 * s);
     ctx.filter = 'none';
-    const fs = (H * 0.95 / ih) * zoom, fw = iw * fs, fh = ih * fs;
+    const fs = (H * 0.95 / dh0) * zoom, fw = dw0 * fs, fh = dh0 * fs;
     ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
     ctx.shadowBlur = 32 * u;
     ctx.shadowOffsetY = 8 * u;
     ctx.drawImage(img, (W - fw) / 2 + pan * (prog - 0.5) * 24 * u, (H - fh) / 2 - (down ? pulse * 6 * u : 0), fw, fh);
   } else {
-    const s = Math.max(W / iw, H / ih) * zoom, dw = iw * s, dh = ih * s;
+    const dw0 = rot % 180 === 0 ? iw : ih, dh0 = rot % 180 === 0 ? ih : iw;
+    const s = Math.max(W / dw0, H / dh0) * zoom, dw = dw0 * s, dh = dh0 * s;
     ctx.drawImage(img,
       (W - dw) / 2 + pan * (prog - 0.5) * 35 * u,
       (H - dh) / 2 - pan * (prog - 0.5) * 20 * u - (down ? pulse * 7 * u : 0), dw, dh);
@@ -232,7 +267,10 @@ const drawMedia = env => {
     ctx.fillStyle = `rgba(255, 255, 255, ${pulse * 0.12})`;
     ctx.fillRect(0, 0, W, H);
   }
-  ctx.restore();
+  } finally {
+    ctx.restore();
+    if (vid) img.close();   // a leaked VideoFrame kills the whole export
+  }
 };
 
 J.register('bg', 'media', { name: '画像・動画', draw: drawMedia }, 'bgmedia');
@@ -259,15 +297,18 @@ const el = (tag, cls, parent) => {
   return e;
 };
 
-const thumb = (li, id) => {
+const thumb = (li, a) => {
   const box = el('div', 'bg-thumb', li);
   const cv = el('canvas', null, box);
   cv.width = 112; cv.height = 63;
-  const bmp = decoded.get(id);
-  if (bmp) {
-    const s = Math.max(112 / bmp.width, 63 / bmp.height);
-    cv.getContext('2d').drawImage(bmp, (112 - bmp.width * s) / 2, (63 - bmp.height * s) / 2, bmp.width * s, bmp.height * s);
-  }
+  const x = cv.getContext('2d');
+  const frame = isVideo(a) ? J.video.thumb(a.id) : decoded.get(a.id);
+  if (!frame) return;                        // a video whose decoder is still cold
+  const fw = isVideo(a) ? frame.displayWidth : frame.width;
+  const fh = isVideo(a) ? frame.displayHeight : frame.height;
+  const s = Math.max(112 / fw, 63 / fh);
+  x.drawImage(frame, (112 - fw * s) / 2, (63 - fh * s) / 2, fw * s, fh * s);
+  if (isVideo(a)) frame.close();
 };
 
 const iconBtn = (label, title, svg, parent) => {
@@ -298,9 +339,9 @@ const renderPanel = (sec, bad) => {
   }
   for (const a of list) {
     const li = el('li', 'bg-asset', ol);
-    thumb(li, a.id);
+    thumb(li, a);
     el('span', 'bg-name muted', li).textContent = a.name;
-    el('span', 'dim mono muted', li).textContent = `${a.w}×${a.h}`;
+    el('span', 'dim mono muted', li).textContent = a.dur ? `${a.w}×${a.h} ${a.dur.toFixed(1)}s` : `${a.w}×${a.h}`;
     iconBtn(T.rm(a.name), T.rm(a.name), X_GONE, li).addEventListener('click', () => drop(a.id));
     const up = el('button', 'small ghost', li); up.type = 'button'; up.textContent = '↑'; up.setAttribute('aria-label', T.up()); up.title = T.up();
     up.addEventListener('click', () => { J.bgMove(a.id, -1); renderPanel(sec, bad); });
@@ -344,7 +385,7 @@ J.bgMount = (anchor) => {
   el('span', null, lab).textContent = T.add();
   lab.title = T.addTitle();
   const inp = el('input', null, lab);
-  inp.type = 'file'; inp.multiple = true; inp.accept = 'image/*'; inp.title = T.addTitle();
+  inp.type = 'file'; inp.multiple = true; inp.accept = 'image/*,video/mp4,video/quicktime'; inp.title = T.addTitle();
   const note = el('p', 'note', sec);
   note.textContent = T.note();
   let bad = [];
