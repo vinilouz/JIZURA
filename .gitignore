@@ -6,3 +6,6 @@ scratch/
 projects/
 docs/handoff/
 dev/www/
+
+# deepwork state (machine)
+.slim/deepwork/
