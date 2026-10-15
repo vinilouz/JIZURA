@@ -1924,7 +1924,7 @@ function boot() {
   bind(); initVolume(); syncUI(); syncLoopBtn(); replan();
   restoreFonts();
   // first visit on a phone: スマホ mode
-  let mode = window.matchMedia && window.matchMedia('(max-width: 760px)').matches ? 'mobile' : 'easy';
+  let mode = 'pro';      // local default: open on the full UI, not the simplified panel
   try { mode = localStorage.getItem('jizura.mode') || mode; } catch (e) {}
   setMode(mode); commit();
   bindTour();

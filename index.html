@@ -37737,7 +37737,7 @@ function boot() {
   bind(); initVolume(); syncUI(); syncLoopBtn(); replan();
   restoreFonts();
   // first visit on a phone: スマホ mode
-  let mode = window.matchMedia && window.matchMedia('(max-width: 760px)').matches ? 'mobile' : 'easy';
+  let mode = 'pro';      // local default: open on the full UI, not the simplified panel
   try { mode = localStorage.getItem('jizura.mode') || mode; } catch (e) {}
   setMode(mode); commit();
   bindTour();
@@ -38293,7 +38293,8 @@ J.bgMount = (anchor) => {
   if (document.getElementById('bgSec')) return document.getElementById('bgSec');
   const style = el('style', null, document.head);
   style.textContent = ICON_STYLE;
-  const sec = el('div', 'sec pro-only', anchor.parentNode);
+  // no pro-only: the panel is part of the flow, not a power-user toggle
+  const sec = el('div', 'sec', anchor.parentNode);
   sec.id = 'bgSec';
   anchor.parentNode.insertBefore(sec, anchor);
   const h = el('div', 'sec-h', sec);

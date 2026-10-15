@@ -375,7 +375,8 @@ J.bgMount = (anchor) => {
   if (document.getElementById('bgSec')) return document.getElementById('bgSec');
   const style = el('style', null, document.head);
   style.textContent = ICON_STYLE;
-  const sec = el('div', 'sec pro-only', anchor.parentNode);
+  // no pro-only: the panel is part of the flow, not a power-user toggle
+  const sec = el('div', 'sec', anchor.parentNode);
   sec.id = 'bgSec';
   anchor.parentNode.insertBefore(sec, anchor);
   const h = el('div', 'sec-h', sec);
