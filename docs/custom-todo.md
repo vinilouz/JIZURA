@@ -23,58 +23,63 @@ No pointing at the timeline, no tapping, no drag-to-adjust, no grid/onset/hybrid
 - [x] `dev/beat_test.py` — fails loudly if any cut lands off the beat grid
 - [x] Favicon
 
-## Phase 1 — what the audio knows (in progress)
+## Phase 1 — what the audio knows (done)
 
-- [x] `analyzeAudio` returns `buffer`, `energy`, `energyRate`, `beats` — verified
-- [ ] Expose `onset` without touching `src/10_audio.js`, by re-deriving from the values it already returns
-- [ ] Downbeat: strongest low-band onset per bar
-- [ ] Bar length: candidates 2 / 3 / 4 scored on low-band onset, tie falls back to 4
-- [ ] Silence: energy below 0.15 sustained for at least 0.8 s
-- [ ] Copy `downbeats` / `barLen` / `silences` onto the plan so the renderer can read them
-- [ ] `dev/audio_test.py` — synthetic signal with a known click tempo, no external audio file
+- [x] `J.analyzeAudio` wrapped, not edited. Upstream computes `flux`/`onset` and throws them away in its return, so there is nothing internal to reuse; the wrapper recomputes from the values upstream already returns.
+- [x] Low-band onset below 150 Hz, bar length 2/3/4 with ties going to 4, downbeat as the strongest low-band onset per bar, silence as energy under 0.15 for at least 0.8 s
+- [x] `downbeats` / `barLen` / `silences` copied onto the plan when the audio carries them
+- [x] `dev/audio_test.py` — synthetic click track, no external audio file
+- Measured cost: about 190–205 ms per music load, no second decode
 
-Terms, so nobody says "bass" again: an **onset** is an attack. A **kick** is the low drum, roughly 50–100 Hz, percussive. A **bass** note is sustained, so cutting on one cuts through the middle of the note. A **downbeat** is beat one of a bar.
+Manual BPM with no music file is a different input, not a degraded result: `12_ui.js` `audioLike()` returns only a beat grid, there is no audio to analyse, and nothing is written to the plan. Whoever needs onsets and finds none has to say so where it needs them.
 
-## Phase 2 — cuts land on the attack (blocked on Gate A)
+## Phase 2 — cuts land on the attack
 
-The official planner spreads cuts inside a line by character weight (`acc += D * u.w / tot`) and then snaps with a tolerance. Snapping to the BPM grid is not the same as landing on the attack.
+Chosen seam: re-plan through `overrides[li].cutTime`. Upstream applies `cutTime` before the unit loop, so `dur`, `params`, `inDur` and `outDur` are recomputed together. No official file is touched.
 
-- [ ] Decide the seam (Gate A): whether this needs an edit inside `J.plan` or can be wrapped
-- [ ] Place each cut on the nearest detected onset inside the line's span
-- [ ] Respect the bar when the detected bar length is not 4
-- [ ] Keep the line start behaviour from Phase 0: snapped by `src/99_custom_beat.js`
-- [ ] Extend `dev/beat_test.py` to assert cuts inside a line land on onsets, not on uniform fractions
+Measured on a 48-line, 175-cut project: 118 requested cut bounds, all 118 landing within 5 ms of an onset; 54 of 54 generic cuts with `inDur`/`outDur` matching the formula for the new `dur`; the `cutTime` block consumes no rng, so the rest of the plan is unchanged. Cost: 41.6 ms to about 84 ms per replan, which the existing debounced replan already absorbs.
+
+Rejected: feeding onsets in place of the beat array (one line), because the snap tolerance is derived from the gap between the first two onsets and a sparse intro drags the bound.
+
+- [ ] Each cut inside a line lands on the nearest onset within a fixed window
+- [ ] Outside the window the official position stands — there is no attack there to follow
+- [ ] Respect the detected bar when it is not 4
+- [ ] Lines with a hand-set `cutTime` or a lock are left alone
+- [ ] The clone carrying `cutTime` is discarded, so the UI keeps showing the line as automatic
+- [ ] `dev/onset_test.py`
 
 ## Phase 3 — image backgrounds
 
-- [ ] Register as `bg` so the official picker, per-line assignment, randomisation and locks pick it up for free
+- [ ] Register through `J.register('bg', …)` from a `99_*.js`, which puts it in the picker for free (`12_ui.js` techItems and the per-cut picker). Use `extra: true` so the randomiser never picks it by itself. Do not use `special: true`, which hides it from the picker entirely.
+- [ ] UI injected by DOM after the audio section, `pro-only` so it disappears in easy mode. No edit to `body.html` or `12_ui.js`.
+- [ ] Binaries in IndexedDB, mirroring the store `10_audio.js` already uses for audio. A data URL inside the project overflows, because the save path rewrites the whole JSON on every edit; an external `assets/` folder breaks the single-file build and `file://`.
 - [ ] Multiple assets, distributed across cuts or across time ranges
-- [ ] Ken Burns pan, blurred matte for portrait sources, grade overlay, vignette, beat-reactive zoom — these existed in the previous fork, in `backup-fork-2026-10-14:src/09_render.js`, and are worth porting rather than rewriting
-- [ ] Decide where the binaries live (Gate A question 3): data URL inside the saved project, IndexedDB, or an external `assets/` folder fetched at runtime. The single-file app is already 2.4 MB, so multiple images and videos decide this, not images alone
-- [ ] No fallback: a failed load raises, it does not silently draw a procedural background
+- [ ] Ken Burns pan, blurred matte for portrait sources, grade overlay, vignette, beat-reactive zoom — these existed in the previous fork, in `backup-fork-2026-10-14:src/09_render.js`
+- [ ] No fallback: a failed load raises
+- [ ] The MP4 export already draws backgrounds (`11_export.js` to `09_render.js`), so images export with no official edit
 
-## Phase 4 — video backgrounds (blocked on Gate A)
+## Phase 4 — video backgrounds
 
-The export walks frames with a monotonic `t` (`R.frame(ctx, plan, span.t0 + i / fps)`), so a video never needs seeking. It needs decoding ahead of the cursor in a sliding window and dropping frames once consumed.
+The frame hook is one line before the render call, a pump that throws if the frame is not ready. The real problem is upstream of that: `VideoDecoder` only accepts `EncodedVideoChunk`, and the repo vendors only the MP4 muxer, which writes. Reading the sample table and the decoder description out of an MP4 is its own project, not a one-line hook. A spike is measuring whether the `VideoDecoder` genuinely requires an own demuxer or whether an official path produces chunks without one.
 
 - [ ] Decode with `WebCodecs.VideoDecoder`, sequential, window ahead of the render cursor
-- [ ] Decode at the output resolution, not the source resolution, to keep the window inside memory
-- [ ] Smallest change to `src/11_export.js` that lets the decoder feed the frame loop (Gate A question 3)
-- [ ] No fallback: no `VideoDecoder` means the export errors out. No frozen frame, no `<video>` scrubbing substitute
-- [ ] Measure the real memory cost before choosing the window size
+- [ ] Decode at the output resolution so the window fits in memory
+- [ ] Smallest possible change to the export loop that lets the decoder feed it
+- [ ] No fallback: without a decoder the export errors out. No frozen frame, no scrubbing substitute
+- [ ] What breaks, to be handled rather than ignored: preview seeking breaks the monotonic `t`; range export needs a warm-up from the start offset; an encoder retry restarts the whole run
 
 ## Phase 5 — keeping it alive
 
-- [x] `docs/custom.md` — what the layers are, how to update, which seams cannot be wrapped
+- [x] `docs/custom.md` — the layers, how to update, which seams cannot be wrapped
 - [x] `docs/custom-todo.md` — this file
-- [ ] Run `dev/smoke_all.py` (the official ~700-expression smoke test) after every merge
-- [ ] Version scheme for the local build
+- [ ] Run the official smoke test after every merge
 - [ ] Decide what happens if the official repo rewrites `J.plan` or `J.computeTiming`
 
 ---
 
 ## Known limits
 
-- The official `11_export.js` does not consume `bg` at all. A local background does not reach the After Effects export. That is a gap, not a crash, and fixing it means teaching the AE panel a new part type.
-- A fixed BPM grid drifts on live or rubato recordings. That is why Phase 2 lands cuts on onsets instead of only on the grid.
+- The official `11_export.js` does not consume `bg` for the After Effects export. A local background does not reach the AE export. That is a gap, not a crash.
+- A fixed BPM grid drifts on live or rubato recordings. That is why phase 2 lands cuts on onsets instead of only on the grid.
 - Three lines in `src/08_planner.js` cannot be wrapped. Every official merge will touch that file; resolve by taking the official version and re-applying the three lines.
+- MP4 demuxing may restrict video backgrounds to MP4. If so, that is a product restriction to state, not hide.
