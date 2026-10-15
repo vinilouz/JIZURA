@@ -68,11 +68,11 @@ async () => {
 RENDER = r"""
 async () => {
   J.plan(window.__p, null);
+  J.bgApply();                       // the real path: the planner assigns from ov.bg
   const r = new J.Renderer();
   const grab = (line) => {
     const plan = J.plan(window.__p, null);
     const cut = plan.cuts.find(c => c.line === line);
-    cut.bg = 'media';
     const cv = document.createElement('canvas'); cv.width = 320; cv.height = 180;
     const ctx = cv.getContext('2d');
     r.frame(ctx, plan, cut.start + cut.dur * 0.5, { scale: 320 / plan.W });
@@ -91,13 +91,27 @@ EMPTY = r"""
 async () => {
   const p = Object.assign(J.defaultProject(), { extra:true, lyrics:'a\nb', style: J.STYLE_ORDER[0], aspect:'16:9', seed: 3,
     timing:{ bpm:0, offset:0, snap:true, tail:0.5, lineTimes:{}, lineScale:1 } });
+  J.plan(p, null);
+  J.bgApply();
   const plan = J.plan(p, null);
-  for (const c of plan.cuts) c.bg = 'media';
   const r = new J.Renderer();
   const cv = document.createElement('canvas'); cv.width = 320; cv.height = 180;
   const ctx = cv.getContext('2d');
   for (const c of plan.cuts) r.frame(ctx, plan, c.start + c.dur * 0.5, { scale: 320 / plan.W });
   return { assets: p.bgAssets ? p.bgAssets.length : 0, registered: !!J.BG.media, line: J.bgForLine(0) };
+}
+"""
+
+APPLY = r"""
+async () => {
+  // the bug: the technique toggle never reaches ov.bg, and pickBg walks
+  // J.BG_ORDER without 'media' in it, so no cut got the background at all
+  J.plan(window.__p, null);
+  const before = J.plan(window.__p, null).cuts.filter(c => c.bg === 'media').length;
+  const n = J.bgApply();
+  const cuts = J.plan(window.__p, null).cuts;
+  const after = cuts.filter(c => c.bg === 'media').length;
+  return { before, lines: n, after, total: cuts.length, ovKeys: Object.keys(window.__p.overrides).length };
 }
 """
 
@@ -119,6 +133,7 @@ async def main():
 
         setup = await pg.evaluate(SETUP)
         imported = await pg.evaluate(IMPORT)
+        apply = await pg.evaluate(APPLY)
         render = await pg.evaluate(RENDER)
         reorder = await pg.evaluate(REORDER)
         empty = await pg.evaluate(EMPTY)
@@ -126,6 +141,7 @@ async def main():
 
     print('setup   ', json.dumps(setup))
     print('import  ', json.dumps({k: imported[k] for k in ('order', 'forLine', 'idbName', 'idbSize', 'idbBlob', 'rows', 'count')}))
+    print('apply   ', json.dumps(apply))
     print('reorder ', json.dumps(reorder))
     print('render  ', json.dumps(render))
     print('empty   ', json.dumps(empty))
@@ -151,6 +167,10 @@ async def main():
         fail('the unsupported file did not stay visible: ' + json.dumps(imported['bad']))
     if reorder['order'] != ['pic1.png', 'pic0.png', 'pic2.png'] or reorder['line1'] != 'pic0.png' or reorder['line0'] != 'pic1.png':
         fail('↓ did not move the asset or the rotation did not follow: ' + json.dumps(reorder))
+    if apply['before'] != 0:
+        fail('the randomiser must never pick the background media by itself: ' + json.dumps(apply))
+    if apply['lines'] < 1 or apply['after'] != apply['total']:
+        fail('J.bgApply did not reach every cut: ' + json.dumps(apply))
     hue = lambda px: ['r', 'g', 'b'][max(range(3), key=lambda i: px[i])]
     # red, green, then back to red: the rotation is the asset order, line by line
     if (hue(render['l0']), hue(render['l1']), hue(render['l3'])) != ('r', 'g', 'r'):

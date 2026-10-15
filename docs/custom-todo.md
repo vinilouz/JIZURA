@@ -95,5 +95,4 @@ Format restrictions, stated rather than hidden:
 
 - A fixed BPM grid drifts on live or rubato recordings. That is why phase 2 lands cuts on onsets instead of only on the grid.
 - Three lines in `src/08_planner.js` cannot be wrapped. Every official merge will touch that file; resolve by taking the official version and re-applying the three lines.
-- Rotation metadata in video is ignored, so phone footage comes out sideways.
 - The Chinese, Korean and Indonesian editions show the Japanese panel text and the Japanese background name. English and Japanese are complete.

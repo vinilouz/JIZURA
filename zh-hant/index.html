@@ -38422,6 +38422,9 @@ const STR = {
     loading: (k, n) => `読み込み中… ${k}/${n}`,
     errType: n => `${n} は対応していません（画像: jpg / png / webp / gif、動画: mp4 / mov（H.264））`,
     errDecode: n => `${n} を読み込めませんでした（壊れているか、対応しない形式です）`,
+    apply: () => '背景に適用',
+    applyTitle: () => 'すべての行の背景にこちらを使います',
+    applied: n => `${n}行に適用しました`,
     errWebM: n => `${n}: WebM は対応していません（EBML 形式の demux が必要です）。MP4 / mov（H.264）を使ってください`,
     errIdb: () => 'このブラウザではファイルを保存できません（プライベートモードなど）。再読み込みすると消えます',
     errPartial: (k, n) => `${n}点中 ${k}点を追加できませんでした`,
@@ -38442,6 +38445,9 @@ const STR = {
     loading: (k, n) => `Loading… ${k}/${n}`,
     errType: n => `${n} is not supported (images: jpg / png / webp / gif, video: mp4 / mov with H.264).`,
     errDecode: n => `Could not read ${n} (corrupt file or unsupported format).`,
+    apply: () => 'Apply as background',
+    applyTitle: () => 'Use these as the background of every line',
+    applied: n => `Applied to ${n} lines`,
     errWebM: n => `${n}: WebM is not supported — it needs an EBML demuxer. Use MP4 or MOV with H.264.`,
     errIdb: () => 'This browser cannot store files (private mode?). Reloading will lose them.',
     errPartial: (k, n) => `Could not add ${k} of ${n}`,
@@ -38488,6 +38494,7 @@ const idbDel = key => idb().then(db => new Promise(res => {
 /* ---------------------------------------------------------------- assets */
 const decoded = new Map();   // id -> ImageBitmap, in memory for the renderer and the thumbnails
 let current = null;          // the last project the planner saw; bgAssets is written here only
+let lastPlan = null;         // its result: how many lines there are to apply a background to
 let seq = 0;
 
 const need = () => {
@@ -38663,7 +38670,9 @@ const drawMedia = env => {
   }
 };
 
-J.register('bg', 'media', { name: T.bgName(), draw: drawMedia }, 'bgmedia');
+// subtle: a busy layout drops the background unless the background is marked
+// subtle (08_planner.js:443), which would blank the picture on those lines
+J.register('bg', 'media', { name: T.bgName(), draw: drawMedia, subtle: true }, 'bgmedia');
 
 /* ---------------------------------------------------------------- wiring */
 /* The planner is the only place that hands out the live project, and pickBg()
@@ -38674,9 +38683,23 @@ J.plan = (project, audio) => {
   current = project;
   if (!Array.isArray(project.bgAssets)) project.bgAssets = [];
   const i = J.BG_ORDER.indexOf('media');
-  if (i < 0) return plan(project, audio);
+  if (i < 0) return (lastPlan = plan(project, audio));
   const [m] = J.BG_ORDER.splice(i, 1);
-  try { return plan(project, audio); } finally { J.BG_ORDER.splice(i, 0, m); }
+  try { return (lastPlan = plan(project, audio)); } finally { J.BG_ORDER.splice(i, 0, m); }
+};
+
+/* Turning the technique on in the picker assigns it to nothing: the planner only
+   reads ov.bg, and pickBg never reaches 'media'. Writing ov.bg is what applies
+   it, so importing pictures applies them and this button re-applies. */
+J.bgApply = () => {
+  const n = lastPlan ? lastPlan.lines.length : 0;
+  if (!current || !n) return 0;
+  for (let li = 0; li < n; li++) {
+    const ov = Object.assign({}, current.overrides[li] || {});
+    ov.bg = 'media';
+    current.overrides[li] = ov;
+  }
+  return n;
 };
 
 /* ---------------------------------------------------------------- panel */
@@ -38770,6 +38793,17 @@ J.bgMount = (anchor) => {
   const h = el('div', 'sec-h', sec);
   el('h2', null, h).textContent = T.h2();
   el('span', 'muted mono', h).id = 'bgCount';
+  const applyBtn = el('button', 'small ghost', h);
+  applyBtn.type = 'button';
+  applyBtn.textContent = T.apply();
+  applyBtn.title = T.applyTitle();
+  applyBtn.addEventListener('click', () => {
+    const n = J.bgApply();
+    if (!n) return;
+    J.uiApi.replan();
+    J.uiApi.flushSave();
+    J.uiApi.toast(T.applied(n));
+  });
   const state = el('p', 'hint', sec); state.id = 'bgState';
   const ol = el('ol', null, sec); ol.id = 'bgAssetList';
   const lab = el('label', 'file', sec);
@@ -38789,6 +38823,8 @@ J.bgMount = (anchor) => {
     inp.value = '';
     renderPanel(sec, bad);
     if (!J.uiApi) return;
+    // importing is the request to use them, so they are applied right away
+    if (r.added.length) J.bgApply();
     J.uiApi.replan();
     J.uiApi.flushSave();
     if (r.added.length) J.uiApi.toast(T.added(r.added.length));
