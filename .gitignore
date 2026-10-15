@@ -1,2 +1,8 @@
 __pycache__/
 *.pyc
+
+# local, never versioned
+scratch/
+projects/
+docs/handoff/
+dev/www/

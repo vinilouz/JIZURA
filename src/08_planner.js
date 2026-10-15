@@ -306,8 +306,9 @@ J.plan = (project, audio) => {
     if (!beats.length || !(project.timing && project.timing.snap)) return t;
     let lo = 0, hi = beats.length - 1;
     while (lo < hi) { const mid = (lo + hi) >> 1; if (beats[mid] < t) lo = mid + 1; else hi = mid; }
-    let best = t, bd = 0.13;
-    for (const k of [lo - 1, lo]) if (k >= 0 && k < beats.length && Math.abs(beats[k] - t) < bd) { bd = Math.abs(beats[k] - t); best = beats[k]; }
+    const beatLen = beats.length > 1 ? beats[1] - beats[0] : 0.46875;
+    let best = t, bd = Math.max(0.18, beatLen * 0.48);
+    for (const k of [lo - 1, lo, lo + 1]) if (k >= 0 && k < beats.length && Math.abs(beats[k] - t) < bd) { bd = Math.abs(beats[k] - t); best = beats[k]; }
     return best;
   };
   const history = [], bgHistory = [], fxHistory = [];
