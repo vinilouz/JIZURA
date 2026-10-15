@@ -50,11 +50,13 @@ Rejected: feeding onsets in place of the beat array (one line), because the snap
 
 ## Phase 3 — image backgrounds (done)
 
-- [x] Registered through `J.register('bg', …)` from a `99_*.js`, which puts it in the picker for free
+- [x] Registered through `J.register('bg', …)` from a `99_*.js`, with `special: true`: the picture owns the background slot and stays out of both pickers and out of the randomiser
+- [x] The picture is the **base layer**; the background technique the planner picked is drawn **on top of it** as an effect (`cut.bgFx`)
+- [x] Driven by `project.bgAssets` alone — nothing is written into `overrides`, so Randomize re-rolls the effects and never the picture
 - [x] UI injected by DOM after the audio section, `pro-only` so it disappears in easy mode
 - [x] Binaries in IndexedDB, mirroring the store `10_audio.js` already uses
 - [x] One asset per line in import order; up and down reorder
-- [x] Ken Burns pan, blurred matte for portrait sources, grade, vignette, downbeat zoom — ported from the previous fork
+- [x] Ken Burns pan, blurred matte for portrait sources, a light veil, vignette, downbeat zoom — ported from the previous fork
 - [x] No fallback: a failed load stays visible in the panel as an item that can be dismissed
 - [x] The MP4 export draws backgrounds with no official edit
 - [x] `dev/bg_test.py`

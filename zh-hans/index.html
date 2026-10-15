@@ -38387,13 +38387,10 @@ const STR = {
     rm: n => `${n} を削除`,
     up: () => '上へ',
     down: () => '下へ',
-    note: () => '読み込んだ画像は「手法 → 背景」のセレクターと、カットごとの差し替えに出ます',
+    note: () => '読み込んだ画像はすべてのカットの背景になります。「手法 → 背景」の技法はその上に重なります',
     loading: (k, n) => `読み込み中… ${k}/${n}`,
     errType: n => `${n} は対応していません（画像: jpg / png / webp / gif、動画: mp4 / mov（H.264））`,
     errDecode: n => `${n} を読み込めませんでした（壊れているか、対応しない形式です）`,
-    apply: () => '背景に適用',
-    applyTitle: () => 'すべての行の背景にこちらを使います',
-    applied: n => `${n}行に適用しました`,
     errWebM: n => `${n}: WebM は対応していません（EBML 形式の demux が必要です）。MP4 / mov（H.264）を使ってください`,
     errIdb: () => 'このブラウザではファイルを保存できません（プライベートモードなど）。再読み込みすると消えます',
     errPartial: (k, n) => `${n}点中 ${k}点を追加できませんでした`,
@@ -38410,13 +38407,10 @@ const STR = {
     rm: n => `Remove ${n}`,
     up: () => 'Move up',
     down: () => 'Move down',
-    note: () => 'Loaded images show up under Techniques → Background, and in the per-cut override picker.',
+    note: () => 'Loaded pictures become the background of every cut. Techniques → Background effects are drawn on top of them.',
     loading: (k, n) => `Loading… ${k}/${n}`,
     errType: n => `${n} is not supported (images: jpg / png / webp / gif, video: mp4 / mov with H.264).`,
     errDecode: n => `Could not read ${n} (corrupt file or unsupported format).`,
-    apply: () => 'Apply as background',
-    applyTitle: () => 'Use these as the background of every line',
-    applied: n => `Applied to ${n} lines`,
     errWebM: n => `${n}: WebM is not supported — it needs an EBML demuxer. Use MP4 or MOV with H.264.`,
     errIdb: () => 'This browser cannot store files (private mode?). Reloading will lose them.',
     errPartial: (k, n) => `Could not add ${k} of ${n}`,
@@ -38463,7 +38457,6 @@ const idbDel = key => idb().then(db => new Promise(res => {
 /* ---------------------------------------------------------------- assets */
 const decoded = new Map();   // id -> ImageBitmap, in memory for the renderer and the thumbnails
 let current = null;          // the last project the planner saw; bgAssets is written here only
-let lastPlan = null;         // its result: how many lines there are to apply a background to
 let seq = 0;
 
 const need = () => {
@@ -38606,11 +38599,11 @@ const drawMedia = env => {
   if (rot % 180 === 0 ? iw < ih * 0.85 : ih < iw * 0.85) {
     const dw0 = rot % 180 === 0 ? iw : ih, dh0 = rot % 180 === 0 ? ih : iw;
     const s = Math.max(W / dw0, H / dh0) * 1.05;
-    if ('filter' in ctx) ctx.filter = 'blur(26px) brightness(0.42)';
+    if ('filter' in ctx) ctx.filter = 'blur(26px) brightness(0.72)';
     ctx.drawImage(img, (W - dw0 * s) / 2, (H - dh0 * s) / 2, dw0 * s, dh0 * s);
     ctx.filter = 'none';
     const fs = (H * 0.95 / dh0) * zoom, fw = dw0 * fs, fh = dh0 * fs;
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
     ctx.shadowBlur = 32 * u;
     ctx.shadowOffsetY = 8 * u;
     ctx.drawImage(img, (W - fw) / 2 + pan * (prog - 0.5) * 24 * u, (H - fh) / 2 - (down ? pulse * 6 * u : 0), fw, fh);
@@ -38622,7 +38615,8 @@ const drawMedia = env => {
       (H - dh) / 2 - pan * (prog - 0.5) * 20 * u - (down ? pulse * 7 * u : 0), dw, dh);
   }
   ctx.shadowColor = 'transparent';
-  ctx.fillStyle = 'rgba(7, 10, 18, 0.38)';
+  // a light veil so white lyrics stay readable — the vignette below does the framing
+  ctx.fillStyle = 'rgba(7, 10, 18, 0.16)';
   ctx.fillRect(0, 0, W, H);
   const vig = ctx.createRadialGradient(W / 2, H * 0.5, Math.min(W, H) * 0.30, W / 2, H * 0.5, Math.hypot(W, H) * 0.68);
   vig.addColorStop(0, 'rgba(0,0,0,0)');
@@ -38633,48 +38627,43 @@ const drawMedia = env => {
     ctx.fillStyle = `rgba(255, 255, 255, ${pulse * 0.12})`;
     ctx.fillRect(0, 0, W, H);
   }
+  // the picture is the base layer: the background technique the planner chose is
+  // an effect that goes on top of it, not a replacement for it
+  const fx = cut.bgFx;
+  if (fx && fx !== 'media' && fx !== 'none' && J.BG[fx]) {   // 'media': a project saved before this layer kept ov.bg='media'
+    ctx.save();
+    try { J.BG[fx].draw(env, cut.bgP || {}); } catch (e) { console.warn('bg', fx, e); }
+    ctx.restore();
+  }
   } finally {
     ctx.restore();
     if (vid) img.close();   // a leaked VideoFrame kills the whole export
   }
 };
 
-// subtle: a busy layout drops the background unless the background is marked
-// subtle (08_planner.js:443), which would blank the picture on those lines
-J.register('bg', 'media', { name: T.bgName(), draw: drawMedia, subtle: true }, 'bgmedia');
+// The picture owns the background slot; the official background techniques ride on
+// top of it as effects. special:true keeps it out of BG_ORDER, so it never shows in a
+// picker, never gets picked, and the randomiser can never drop the picture.
+J.register('bg', 'media', { name: T.bgName(), draw: drawMedia, special: true }, 'bgmedia');
 
 /* ---------------------------------------------------------------- wiring */
-/* The planner is the only place that hands out the live project, and pickBg()
-   walks J.BG_ORDER without asking randomOk — so 'media' is hidden from the
-   randomiser here and stays visible in the picker, which lists the order. */
+/* The picture is the base layer, so it takes the background slot and the official
+   background technique the planner picked becomes an effect on top of it. The
+   picture is driven by bgAssets alone, which no layer randomises, so pressing
+   Randomize changes the effects and never the picture. */
 const plan = J.plan;
 J.plan = (project, audio) => {
   current = project;
   if (!Array.isArray(project.bgAssets)) project.bgAssets = [];
-  const i = J.BG_ORDER.indexOf('media');
-  if (i < 0) return (lastPlan = plan(project, audio));
-  const [m] = J.BG_ORDER.splice(i, 1);
-  try { return (lastPlan = plan(project, audio)); } finally { J.BG_ORDER.splice(i, 0, m); }
+  const p = plan(project, audio);
+  if (assets().length) for (const c of p.cuts) { c.bgFx = c.bg; c.bg = 'media'; }
+  return p;
 };
 
 /* A layer above re-plans from a clone whose overrides are a fresh shallow copy,
    so `current` would end on that clone and every write would miss the project
    the editor re-plans from. The layer above hands the real one back. */
 J.bgLiveProject = project => { current = project; };
-
-/* Turning the technique on in the picker assigns it to nothing: the planner only
-   reads ov.bg, and pickBg never reaches 'media'. Writing ov.bg is what applies
-   it, so importing pictures applies them and this button re-applies. */
-J.bgApply = () => {
-  const n = lastPlan ? lastPlan.lines.length : 0;
-  if (!current || !n) return 0;
-  for (let li = 0; li < n; li++) {
-    const ov = Object.assign({}, current.overrides[li] || {});
-    ov.bg = 'media';
-    current.overrides[li] = ov;
-  }
-  return n;
-};
 
 /* ---------------------------------------------------------------- panel */
 const el = (tag, cls, parent) => {
@@ -38767,17 +38756,6 @@ J.bgMount = (anchor) => {
   const h = el('div', 'sec-h', sec);
   el('h2', null, h).textContent = T.h2();
   el('span', 'muted mono', h).id = 'bgCount';
-  const applyBtn = el('button', 'small ghost', h);
-  applyBtn.type = 'button';
-  applyBtn.textContent = T.apply();
-  applyBtn.title = T.applyTitle();
-  applyBtn.addEventListener('click', () => {
-    const n = J.bgApply();
-    if (!n) return;
-    J.uiApi.replan();
-    J.uiApi.flushSave();
-    J.uiApi.toast(T.applied(n));
-  });
   const state = el('p', 'hint', sec); state.id = 'bgState';
   const ol = el('ol', null, sec); ol.id = 'bgAssetList';
   const lab = el('label', 'file', sec);
@@ -38797,8 +38775,6 @@ J.bgMount = (anchor) => {
     inp.value = '';
     renderPanel(sec, bad);
     if (!J.uiApi) return;
-    // importing is the request to use them, so they are applied right away
-    if (r.added.length) J.bgApply();
     J.uiApi.replan();
     J.uiApi.flushSave();
     if (r.added.length) J.uiApi.toast(T.added(r.added.length));

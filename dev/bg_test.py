@@ -68,7 +68,6 @@ async () => {
 RENDER = r"""
 async () => {
   J.plan(window.__p, null);
-  J.bgApply();                       // the real path: the planner assigns from ov.bg
   const r = new J.Renderer();
   const grab = (line) => {
     const plan = J.plan(window.__p, null);
@@ -92,7 +91,6 @@ async () => {
   const p = Object.assign(J.defaultProject(), { extra:true, lyrics:'a\nb', style: J.STYLE_ORDER[0], aspect:'16:9', seed: 3,
     timing:{ bpm:0, offset:0, snap:true, tail:0.5, lineTimes:{}, lineScale:1 } });
   J.plan(p, null);
-  J.bgApply();
   const plan = J.plan(p, null);
   const r = new J.Renderer();
   const cv = document.createElement('canvas'); cv.width = 320; cv.height = 180;
@@ -102,34 +100,44 @@ async () => {
 }
 """
 
-APPLY = r"""
+BASE = r"""
 async () => {
-  // the bug: the technique toggle never reaches ov.bg, and pickBg walks
-  // J.BG_ORDER without 'media' in it, so no cut got the background at all
+  // importing is the whole request: bgAssets alone drives the picture, no override write
   J.plan(window.__p, null);
-  const before = J.plan(window.__p, null).cuts.filter(c => c.bg === 'media').length;
-  const n = J.bgApply();
   const cuts = J.plan(window.__p, null).cuts;
-  const after = cuts.filter(c => c.bg === 'media').length;
-  return { before, lines: n, after, total: cuts.length, ovKeys: Object.keys(window.__p.overrides).length };
+  return { on: cuts.filter(c => c.bg === 'media').length, total: cuts.length,
+           fx: cuts.map(c => c.bgFx).join(','),
+           inOrder: J.BG_ORDER.indexOf('media'),
+           ovKeys: Object.keys(window.__p.overrides).length };
 }
 """
 
 # With music the cut layer re-plans from a clone, so the background layer used
 # to end up holding that clone: every write into overrides missed the project the
 # editor re-plans from, and importing silently did nothing.
-APPLY_AUDIO = r"""
+AUDIO = r"""
 async () => {
   const onset = new Float32Array(600);
   for (let f = 1; f < 600; f++) onset[f] = f % 20 === 0 ? 1 : 0.05;
   const audio = { onset: onset, energyRate: 100, duration: 6, peaks: [], barLen: 4, downbeats: [], silences: [] };
+  const cuts = J.plan(window.__p, audio).cuts;
+  return { on: cuts.filter(c => c.bg === 'media').length, total: cuts.length };
+}
+"""
+
+# The owner reported that Randomize dropped the picture. omakase rebuilds
+# `overrides` from scratch — only lock and cutTime survive — so a picture parked
+# there is gone. The picture is driven by bgAssets, which omakase never returns.
+RANDOMIZE = r"""
+async () => {
   const p = window.__p;
-  delete p.overrides[0];
-  J.plan(p, audio);
-  const n = J.bgApply();
-  const cuts = J.plan(p, audio).cuts;
-  return { lines: n, after: cuts.filter(c => c.bg === 'media').length, total: cuts.length,
-           ov0: (p.overrides[0] || {}).bg || null };
+  const r = J.omakase(p, Math.random, null);
+  Object.assign(p, r);                    // exactly what 12_ui.js omakase() does
+  const cuts = J.plan(p, null).cuts;
+  return { on: cuts.filter(c => c.bg === 'media').length, total: cuts.length,
+           fx: cuts.map(c => c.bgFx).join(','),
+           assetsKept: Object.prototype.hasOwnProperty.call(r, 'bgAssets'),
+           assets: (p.bgAssets || []).length };
 }
 """
 
@@ -151,17 +159,19 @@ async def main():
 
         setup = await pg.evaluate(SETUP)
         imported = await pg.evaluate(IMPORT)
-        apply = await pg.evaluate(APPLY)
-        apply_audio = await pg.evaluate(APPLY_AUDIO)
+        base = await pg.evaluate(BASE)
+        audio = await pg.evaluate(AUDIO)
         render = await pg.evaluate(RENDER)
         reorder = await pg.evaluate(REORDER)
         empty = await pg.evaluate(EMPTY)
+        randomize = await pg.evaluate(RANDOMIZE)   # last: omakase rewrites the project in place
         await b.close()
 
     print('setup   ', json.dumps(setup))
     print('import  ', json.dumps({k: imported[k] for k in ('order', 'forLine', 'idbName', 'idbSize', 'idbBlob', 'rows', 'count')}))
-    print('apply   ', json.dumps(apply))
-    print('apply+au', json.dumps(apply_audio))
+    print('base    ', json.dumps(base))
+    print('audio   ', json.dumps(audio))
+    print('rndmize ', json.dumps(randomize))
     print('reorder ', json.dumps(reorder))
     print('render  ', json.dumps(render))
     print('empty   ', json.dumps(empty))
@@ -187,14 +197,22 @@ async def main():
         fail('the unsupported file did not stay visible: ' + json.dumps(imported['bad']))
     if reorder['order'] != ['pic1.png', 'pic0.png', 'pic2.png'] or reorder['line1'] != 'pic0.png' or reorder['line0'] != 'pic1.png':
         fail('↓ did not move the asset or the rotation did not follow: ' + json.dumps(reorder))
-    if apply['before'] != 0:
-        fail('the randomiser must never pick the background media by itself: ' + json.dumps(apply))
-    if apply['lines'] < 1 or apply['after'] != apply['total']:
-        fail('J.bgApply did not reach every cut: ' + json.dumps(apply))
-    if apply_audio['ov0'] != 'media':
-        fail('the background write missed the project the editor re-plans from: ' + json.dumps(apply_audio))
-    if apply_audio['after'] != apply_audio['total']:
-        fail('the background did not survive re-planning with music: ' + json.dumps(apply_audio))
+    if base['inOrder'] != -1:
+        fail('the picture must stay out of BG_ORDER so no picker offers it: ' + json.dumps(base))
+    if base['on'] != base['total']:
+        fail('importing alone did not give every cut the picture: ' + json.dumps(base))
+    if base['ovKeys'] != 0:
+        fail('the picture must not be written into overrides: ' + json.dumps(base))
+    if 'none' in base['fx'].split(',') and base['fx'].count('none') == base['total']:
+        fail('no background effect was picked at all: ' + json.dumps(base))
+    if audio['on'] != audio['total']:
+        fail('the picture did not survive re-planning with music: ' + json.dumps(audio))
+    if randomize['assetsKept']:
+        fail('omakase must not return bgAssets: ' + json.dumps(randomize))
+    if randomize['assets'] != 3:
+        fail('Randomize dropped the imported pictures: ' + json.dumps(randomize))
+    if randomize['on'] != randomize['total']:
+        fail('Randomize dropped the picture from a cut: ' + json.dumps(randomize))
     hue = lambda px: ['r', 'g', 'b'][max(range(3), key=lambda i: px[i])]
     # red, green, then back to red: the rotation is the asset order, line by line
     if (hue(render['l0']), hue(render['l1']), hue(render['l3'])) != ('r', 'g', 'r'):
