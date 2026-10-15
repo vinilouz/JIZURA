@@ -83,10 +83,17 @@ Format restrictions, stated rather than hidden:
 
 ---
 
+## Decisions
+
+- **The LRC is the base.** It says when each line is; the music only refines where a cut lands inside the line. When there is no attack near the ideal position, the official position stands. That is not a fallback: it is the absence of the event.
+- **English is the interface.** The Japanese and Korean editions stay because the songs are in those languages, but only the English strings matter for day-to-day use. No other translations will be added.
+- **The After Effects export is out of scope.** It is not used, so the official gap there is not worked around.
+
+---
+
 ## Known limits
 
-- The official `11_export.js` does not consume `bg` for the After Effects export. A local background does not reach the AE export. That is a gap, not a crash.
 - A fixed BPM grid drifts on live or rubato recordings. That is why phase 2 lands cuts on onsets instead of only on the grid.
 - Three lines in `src/08_planner.js` cannot be wrapped. Every official merge will touch that file; resolve by taking the official version and re-applying the three lines.
-- The panel strings exist in Japanese and English. The Chinese, Korean and Indonesian editions show the Japanese text until someone translates them.
-- The registered background name is fixed in Japanese, so it appears that way in the English edition.
+- Rotation metadata in video is ignored, so phone footage comes out sideways.
+- The Chinese, Korean and Indonesian editions show the Japanese panel text and the Japanese background name. English and Japanese are complete.

@@ -38187,6 +38187,7 @@ const STR = {
     empty: () => 'まだ何もありません。画像や動画を読むと、カットの順番で自動で背景が切り替わります',
     one: () => 'すべてのカットにこの画像が使われます',
     count: n => `${n}点`,
+    bgName: () => '画像・動画',
     rm: n => `${n} を削除`,
     up: () => '上へ',
     down: () => '下へ',
@@ -38206,6 +38207,7 @@ const STR = {
     empty: () => 'Nothing here yet. Add images and the background changes automatically, line by line.',
     one: () => 'Every cut uses this image.',
     count: n => `${n} items`,
+    bgName: () => 'Pictures & videos',
     rm: n => `Remove ${n}`,
     up: () => 'Move up',
     down: () => 'Move down',
@@ -38434,7 +38436,7 @@ const drawMedia = env => {
   }
 };
 
-J.register('bg', 'media', { name: '画像・動画', draw: drawMedia }, 'bgmedia');
+J.register('bg', 'media', { name: T.bgName(), draw: drawMedia }, 'bgmedia');
 
 /* ---------------------------------------------------------------- wiring */
 /* The planner is the only place that hands out the live project, and pickBg()
