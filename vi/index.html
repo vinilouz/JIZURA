@@ -38058,6 +38058,15 @@ J.getSchema = () => {
     };
   });
 
+  const themes = [
+    { id: "lyricpv", name: "Lyric PV", desc: "Short phrases, cinematic musical meter timing and editorial typography" },
+    { id: "kinetic", name: "Kinetic Motion", desc: "Fast cuts, punchy typography, pop and glitch energy" },
+    { id: "wa",      name: "Traditional (Wafuu)", desc: "Japanese brush aesthetics, calligraphy and calm balance" },
+    { id: "horror",  name: "Horror / VHS", desc: "Glitch artifacts, tape static and ominous pacing" },
+    { id: "pop",     name: "Pop Dynamic", desc: "Vibrant colors, playful bounces and expressive motion" },
+    { id: "ballad",  name: "Ballad / Calm", desc: "Slow emotional tempo, held words and gentle transitions" }
+  ];
+
   const moods = Object.entries(J.MOODS || {}).map(([id, m]) => ({
     id,
     name: m.name || id,

@@ -2,8 +2,8 @@
   "styles": [
     {
       "id": "noir",
-      "name": "ノワール・クロマ",
-      "desc": "黒地・白文字・シアン/琥珀の色ズレ",
+      "name": "Noir Chroma",
+      "desc": "Black and white with cyan and amber color offsets",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -49,8 +49,8 @@
     },
     {
       "id": "crimson",
-      "name": "クリムゾン・シグナル",
-      "desc": "深紅地・白と黒の二段組み・データ破損",
+      "name": "Crimson Signal",
+      "desc": "Deep red, monochrome type and damaged data",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -105,8 +105,8 @@
     },
     {
       "id": "caution",
-      "name": "コーション",
-      "desc": "黄色地・赤と青のアクセント・計器UI",
+      "name": "Caution",
+      "desc": "Yellow, red and blue with instrument graphics",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -161,8 +161,8 @@
     },
     {
       "id": "magenta",
-      "name": "ポップ・マゼンタ",
-      "desc": "ショッキングピンク×白・太丸ゴシック・引き出し線",
+      "name": "Pop Magenta",
+      "desc": "Hot pink, round bold type and callout lines",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -218,8 +218,8 @@
     },
     {
       "id": "paper",
-      "name": "ペーパー・インク",
-      "desc": "紙の質感・藍とマゼンタ・明朝の残像",
+      "name": "Paper and Ink",
+      "desc": "Paper texture, indigo, magenta and serif echoes",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -284,8 +284,8 @@
     },
     {
       "id": "hud",
-      "name": "ダークHUD",
-      "desc": "炭色地・細線フレーム・橙の差し色・日食",
+      "name": "Dark HUD",
+      "desc": "Charcoal, fine frames, orange accents and eclipses",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -330,8 +330,8 @@
     },
     {
       "id": "mint",
-      "name": "ミント・ターミナル",
-      "desc": "黒×青緑×ライム・ラベル貼り・スリットスキャン",
+      "name": "Mint Terminal",
+      "desc": "Black, teal and lime with scan effects",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -387,8 +387,8 @@
     },
     {
       "id": "specimen",
-      "name": "スペシメン",
-      "desc": "墨色地・明朝・辞書の注釈と引き出し線",
+      "name": "Type Specimen",
+      "desc": "Ink colored background with serif annotations",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -433,8 +433,8 @@
     },
     {
       "id": "transit",
-      "name": "トランジット",
-      "desc": "オリーブ×黄色・矢印と標識・網点",
+      "name": "Transit",
+      "desc": "Olive and yellow with signage and halftone",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -488,8 +488,8 @@
     },
     {
       "id": "blueprint",
-      "name": "ブループリント",
-      "desc": "鮮青×白×黒・図形コラージュ・斜め帯",
+      "name": "Blueprint",
+      "desc": "Blue, white and black graphic collage",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -544,8 +544,8 @@
     },
     {
       "id": "rouge",
-      "name": "ルージュ・グラデ",
-      "desc": "明るいグレー地・赤のグラデーション・カプセル",
+      "name": "Rouge Gradient",
+      "desc": "Light gray and red gradients with capsules",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -589,8 +589,8 @@
     },
     {
       "id": "mono",
-      "name": "モノ・RGB",
-      "desc": "灰色の空間・白い明朝・強いRGB分離・座標の円",
+      "name": "Mono RGB",
+      "desc": "Gray space, white serif and bold RGB separation",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -634,8 +634,8 @@
     },
     {
       "id": "hrRuin",
-      "name": "廃墟",
-      "desc": "褪せた緑灰色・錆の赤・明朝の残響",
+      "name": "Ruins",
+      "desc": "Faded green-grey, rust red and echoing serif type",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -690,8 +690,8 @@
     },
     {
       "id": "hrNightRec",
-      "name": "深夜の録画",
-      "desc": "真っ黒な画面・監視映像の白と赤・砂嵐",
+      "name": "Midnight Recording",
+      "desc": "Pitch-black frames, CCTV white and red, static",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -746,8 +746,8 @@
     },
     {
       "id": "hrCurse",
-      "name": "呪いの手紙",
-      "desc": "黄ばんだ便箋・褪せた墨・暗い赤の書き込み",
+      "name": "Cursed Letter",
+      "desc": "Yellowed paper, faded ink and dark red handwriting",
       "extra": false,
       "wa": false,
       "horror": false,
@@ -804,8 +804,8 @@
     },
     {
       "id": "sakura",
-      "name": "サクラ",
-      "desc": "淡い桜色・深い梅紫・夜桜・丸文字と明朝",
+      "name": "Sakura",
+      "desc": "Soft cherry pink and plum with rounded and serif type",
       "extra": true,
       "wa": true,
       "horror": false,
@@ -870,8 +870,8 @@
     },
     {
       "id": "ocean",
-      "name": "深海",
-      "desc": "濃紺の深海・シアンの発光・泡と細いゴシック",
+      "name": "Deep Sea",
+      "desc": "Navy, glowing cyan, bubbles and light sans type",
       "extra": true,
       "wa": false,
       "horror": false,
@@ -936,8 +936,8 @@
     },
     {
       "id": "sunset",
-      "name": "夕焼けグラデ",
-      "desc": "橙から菫へのグラデーション・太い明朝・逆光",
+      "name": "Sunset Gradient",
+      "desc": "Orange to violet, bold serif and backlight",
       "extra": true,
       "wa": false,
       "horror": false,
@@ -1003,8 +1003,8 @@
     },
     {
       "id": "forest",
-      "name": "森の手帖",
-      "desc": "苔と生成り・樹皮の茶・鉛筆の手書き文字",
+      "name": "Forest Notebook",
+      "desc": "Moss, natural paper and pencil lettering",
       "extra": true,
       "wa": false,
       "horror": false,
@@ -1069,8 +1069,8 @@
     },
     {
       "id": "vapor",
-      "name": "ヴェイパー",
-      "desc": "薄紫とパステルのピンク/水色・明朝・VHSのにじみ",
+      "name": "Vaporwave",
+      "desc": "Pastel pink and blue with VHS bloom",
       "extra": true,
       "wa": false,
       "horror": false,
@@ -1137,8 +1137,8 @@
     },
     {
       "id": "newsprint",
-      "name": "新聞",
-      "desc": "灰色の更紙・墨と赤・見出し明朝・CMYの版ズレと網点",
+      "name": "Newsprint",
+      "desc": "Gray paper, black and red with halftone registration",
       "extra": true,
       "wa": false,
       "horror": false,
@@ -1193,8 +1193,8 @@
     },
     {
       "id": "synth80",
-      "name": "シンセ80s",
-      "desc": "黒地にネオンのマゼンタ/シアン・立体文字・走査線",
+      "name": "Synth 80s",
+      "desc": "Black with neon magenta, cyan and scanlines",
       "extra": true,
       "wa": false,
       "horror": false,
@@ -1259,8 +1259,8 @@
     },
     {
       "id": "kraft",
-      "name": "クラフト紙",
-      "desc": "クラフト紙と生成り・スタンプの朱と藍・マステ",
+      "name": "Kraft Paper",
+      "desc": "Warm paper, red and indigo stamps and washi tape",
       "extra": true,
       "wa": false,
       "horror": false,
@@ -1325,8 +1325,8 @@
     },
     {
       "id": "candy",
-      "name": "キャンディ",
-      "desc": "ミント/いちご/レモン/ぶどうのパステル・丸く弾む文字",
+      "name": "Candy",
+      "desc": "Mint and fruit pastel colors with bouncing letters",
       "extra": true,
       "wa": false,
       "horror": false,
@@ -1392,8 +1392,8 @@
     },
     {
       "id": "acid",
-      "name": "アシッド",
-      "desc": "黒×酸性グリーン×マゼンタ・荒い書体と壊れた画面",
+      "name": "Acid",
+      "desc": "Black, acid green and magenta with distressed type",
       "extra": true,
       "wa": false,
       "horror": false,
@@ -1459,8 +1459,8 @@
     },
     {
       "id": "sumi",
-      "name": "墨と朱",
-      "desc": "和紙の生成り・墨の筆文字・朱の落款",
+      "name": "Ink and Vermilion",
+      "desc": "Japanese paper, brush lettering and red seals",
       "extra": true,
       "wa": true,
       "horror": false,
@@ -1525,8 +1525,8 @@
     },
     {
       "id": "gold",
-      "name": "金夜",
-      "desc": "漆黒と金箔・象牙の明朝・きらめく光",
+      "name": "Golden Night",
+      "desc": "Deep black, gold foil, ivory serif and glints",
       "extra": true,
       "wa": false,
       "horror": false,
@@ -4053,5 +4053,37 @@
       "enabled": false
     },
     "fonts": {}
-  }
+  },
+  "themes": [
+    {
+      "id": "lyricpv",
+      "name": "Lyric PV",
+      "desc": "Short phrases, cinematic musical meter timing and editorial typography"
+    },
+    {
+      "id": "kinetic",
+      "name": "Kinetic Motion",
+      "desc": "Fast cuts, punchy typography, pop and glitch energy"
+    },
+    {
+      "id": "wa",
+      "name": "Traditional (Wafuu)",
+      "desc": "Japanese brush aesthetics, calligraphy and calm balance"
+    },
+    {
+      "id": "horror",
+      "name": "Horror / VHS",
+      "desc": "Glitch artifacts, tape static and ominous pacing"
+    },
+    {
+      "id": "pop",
+      "name": "Pop Dynamic",
+      "desc": "Vibrant colors, playful bounces and expressive motion"
+    },
+    {
+      "id": "ballad",
+      "name": "Ballad / Calm",
+      "desc": "Slow emotional tempo, held words and gentle transitions"
+    }
+  ]
 }
