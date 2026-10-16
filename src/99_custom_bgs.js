@@ -132,6 +132,16 @@ const accept = async (file) => {
       J.video.drop(id);
       return { name: file.name, why: T.errIdb() };
     }
+    // WebCodecs hands frames back asynchronously, so the very first draw always
+    // misses and the renderer — which only warns — would paint an empty frame.
+    // Decoding the first GOP here makes the frame there before the reel reaches it.
+    try {
+      await J.video.ready(id, 0);
+      warmReel.add(id);
+    } catch (e) {
+      J.video.drop(id);
+      return { name: file.name, why: `${file.name}: ${e.message}` };
+    }
     return { asset: { id, name: file.name, type: file.type, w: info.w, h: info.h, dur: info.dur } };
   }
   let bmp;
@@ -194,6 +204,32 @@ J.bgForLine = (line) => {
   return list[((l % list.length) + list.length) % list.length];
 };
 
+/* Videos are one continuous reel instead of a per-line rotation: the clips play
+   back to back in import order, each covering its own duration from t=0. The
+   pictures keep the rotation, which is what the panel documents. */
+J.bgVideoAt = (tSec) => {
+  const reels = assets().filter(isVideo);
+  if (!reels.length) return null;
+  let acc = 0;
+  for (const a of reels) {
+    if (tSec < acc + a.dur) return { asset: a, local: Math.max(0, tSec - acc) };
+    acc += a.dur;
+  }
+  const last = reels[reels.length - 1];
+  return { asset: last, local: Math.max(0, last.dur - 1e-3) };   // past the reel: hold the last frame
+};
+
+/* WebCodecs delivers frames asynchronously and the render is synchronous, so the
+   first draw of a cold clip always misses and the renderer — which only warns —
+   would paint an empty frame. Import warms the first clip; the rest are warmed
+   one clip ahead, which is a whole clip of playback before they are needed. */
+const warmReel = new Set();
+const warmAhead = (asset) => {
+  if (!asset || warmReel.has(asset.id)) return;
+  warmReel.add(asset.id);
+  J.video.ready(asset.id, 0).catch(e => console.warn('bg warm', asset.name, e));
+};
+
 /* re-read the bytes after a reload: the metadata is in the project, the picture is not */
 J.bgRestore = async () => {
   const list = assets();
@@ -201,7 +237,10 @@ J.bgRestore = async () => {
     if (decoded.has(a.id)) continue;
     const blob = await idbGet('bg:' + a.id);
     if (!blob) throw new Error(`99_custom_bgs: ${a.name} is missing from IndexedDB`);
-    if (isVideo(a)) await J.video.open(a.id, await blob.arrayBuffer());
+    if (isVideo(a)) {
+      await J.video.open(a.id, await blob.arrayBuffer());
+      await J.video.ready(a.id, 0);   // same warm-up as import: the first draw must not miss
+    }
     else decoded.set(a.id, await createImageBitmap(blob));
   }
 };
@@ -220,9 +259,14 @@ const drawMedia = env => {
   if (!list.length) return;                    // nothing loaded: the editor background stays as it is
   const cut = env.cut;
   if (!cut) throw new Error('99_custom_bgs: background media needs a cut to rotate over');
-  const asset = J.bgForLine(cut.line);
+  const reel = J.bgVideoAt(env.t);
+  const asset = reel ? reel.asset : J.bgForLine(cut.line);
+  if (reel) {
+    const reels = assets().filter(isVideo);
+    warmAhead(reels[reels.indexOf(reel.asset) + 1]);
+  }
   const vid = isVideo(asset);
-  const img = vid ? J.video.frame(asset.id, env.t) : decoded.get(asset.id);
+  const img = vid ? J.video.frame(asset.id, reel.local) : decoded.get(asset.id);
   if (!img) throw new Error(`99_custom_bgs: ${asset.name} is not decoded yet`);
   const rot = vid ? J.video.rotation(asset.id) : 0;
   const ctx = env.ctx, W = env.W, H = env.H, u = H / 1080;
@@ -280,7 +324,9 @@ const drawMedia = env => {
   }
   } finally {
     ctx.restore();
-    if (vid) img.close();   // a leaked VideoFrame kills the whole export
+    // J.video keeps ownership: evict() closes each frame once it falls behind the
+    // playhead. Closing here too would hand out an already-closed frame, because the
+    // preview renders faster than a 24 fps clip changes frame.
   }
 };
 

@@ -254,7 +254,10 @@ async def main():
         if needle not in names[name]: fail(f'{name} error is not named ({needle}): ' + names[name])
     if 'moov' in names.get('clip.webm', ''): fail('the WebM file reported a missing moov')
 
-    if decode['first']['fed'] < 30: fail('the decoder barely fed anything: ' + json.dumps(decode['first']))
+    # the window is 0.8 s, so the decoder must have filled it ahead of the playhead —
+    # an absolute sample count would only re-state the window size (see WINDOW_US)
+    if decode['first']['fed'] < 10 or decode['first']['held'] < 10:
+        fail('the decoder did not fill the window: ' + json.dumps(decode['first']))
     if decode['back']['seeks'] < 1: fail('a backward jump did not seek: ' + json.dumps(decode['back']))
     if decode['back']['held'] > 400: fail('the window is not bounded: ' + json.dumps(decode['back']))
     if decode['cold'] != 'ok': fail('cold backward seek failed: ' + json.dumps(decode['cold']))

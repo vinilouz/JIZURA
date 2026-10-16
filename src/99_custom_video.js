@@ -23,8 +23,11 @@ if (typeof J !== 'object') throw new Error('99_custom_video: J is missing — lo
 if (!J.Renderer) throw new Error('99_custom_video: J.Renderer is missing — the frame hook cannot be installed');
 
 /* ------------------------------------------------------------ window sizes */
-/* measured in the spike: 160 frames of 1080p I420 is 5.3 s of lookahead. */
-const WINDOW_US = 5300000;
+/* The spike measured 5.3 s of 1080p lookahead for ONE clip. A reel keeps every
+   clip's window alive at once, so 19 clips at 720p held ~3 GB of VideoFrames and
+   the decoder stopped keeping up with the playhead. 0.8 s is ~19 frames of
+   24 fps — still six times what one render step advances. */
+const WINDOW_US = 800000;
 const FEED_MAX = 24;          // chunks queued in the decoder at once
 const KEEP_US = 500000;       // frames kept behind the playhead (seek jitter)
 const SEEK_JUMP_US = 500000;  // a forward jump larger than this is a seek, not playback
@@ -162,6 +165,13 @@ const demux = buf => {
   }
   for (let i = 0; i < count; i++) ts[i] = Math.round(ts[i]);
 
+  /* B-frames leave ts in DECODE order while the presentation order differs, so every
+     time lookup has to go through this index. Binary-searching ts itself lands on the
+     wrong sample, and the decoder then never gets asked for the frame it produced. */
+  const sorted = new Int32Array(count);
+  for (let i = 0; i < count; i++) sorted[i] = i;
+  sorted.sort((a, b) => ts[a] - ts[b]);
+
   /* sample sizes (stsz) */
   const size = new Uint32Array(count);
   const uniform = dv.getUint32(stsz.start + 4);
@@ -199,7 +209,7 @@ const demux = buf => {
 
   return {
     codec, description, codedWidth: width, codedHeight: height, rotation: rot,
-    timescale, count, keys, key, ts, dur, size, off, buffer: buf,
+    timescale, count, keys, key, ts, sorted, dur, size, off, buffer: buf,
     duration: mvTimescale ? mvDuration / mvTimescale : 0,
   };
 };
@@ -228,7 +238,7 @@ J.video = {
     if (!support.supported) throw new Error(`this browser cannot decode ${t.codec}`);
     const v = {
       t, cfg, outputs: new Map(), next: 0, playhead: -1, pumping: false, fail: null, decoder: null,
-      bytes: buffer.byteLength, fed: 0, seeks: 0, gen: 0,
+      bytes: buffer.byteLength, fed: 0, seeks: 0, gen: 0, flushed: false,
     };
     const dec = new VideoDecoder({
       output: frame => { v.outputs.set(frame.timestamp, frame); },
@@ -311,15 +321,28 @@ const must = id => {
   return v;
 };
 
-/* index of the last sample whose presentation timestamp is <= us */
+/* decode index of the last sample whose presentation timestamp is <= us */
 const indexAt = (t, us) => {
+  const s = t.sorted;
+  if (t.ts[s[0]] > us) return s[0];
   let lo = 0, hi = t.count - 1;
-  if (t.ts[0] > us) return 0;
   while (lo < hi) {
     const mid = (lo + hi + 1) >> 1;
-    if (t.ts[mid] <= us) lo = mid; else hi = mid - 1;
+    if (t.ts[s[mid]] <= us) lo = mid; else hi = mid - 1;
   }
-  return lo;
+  return s[lo];
+};
+
+/* highest decode index to feed so that every sample up to us is decoded */
+const feedTo = (t, us) => {
+  const s = t.sorted;
+  let hi = -1;
+  for (let k = 0; k < t.count; k++) {
+    const i = s[k];
+    if (t.ts[i] > us) break;
+    if (i > hi) hi = i;
+  }
+  return hi;
 };
 
 /* A jump in either direction: reset and refeed from the keyframe at or before t.
@@ -333,6 +356,7 @@ const seek = (v, us) => {
   v.decoder.reset();
   v.decoder.configure(v.cfg);
   v.next = k;
+  v.flushed = false;
   v.seeks++;
   // a pump already in flight holds the guard and is filling a window this reset
   // just invalidated; hand the flag back so the next pump starts from this keyframe
@@ -350,13 +374,21 @@ const pump = v => {
   v.pumping = true;
   const gen = v.gen;
   const run = async () => {
-    const limit = v.playhead + WINDOW_US;
-    while (!v.fail && v.gen === gen && v.next < v.t.count && v.t.ts[v.next] <= limit) {
+    // ts is in decode order, so the feed limit comes from the presentation index
+    const upto = feedTo(v.t, v.playhead + WINDOW_US);
+    while (!v.fail && v.gen === gen && v.next <= upto) {
       if (v.decoder.decodeQueueSize >= FEED_MAX) { await tick(); continue; }
       v.decoder.decode(chunk(v, v.next));
       v.next++; v.fed++;
     }
-    while (!v.fail && v.gen === gen && v.decoder.decodeQueueSize > 0 && v.next < v.t.count && v.t.ts[v.next] <= limit) await tick();
+    while (!v.fail && v.gen === gen && v.decoder.decodeQueueSize > 0 && v.next <= upto) await tick();
+    // the decoder holds the trailing frames back until it is told no more are coming.
+    // Without this the last frames of a clip never arrive, and a background reel that
+    // has run past its end sits on a frame that can never be drawn.
+    if (!v.fail && v.gen === gen && upto >= v.t.count - 1 && !v.flushed) {
+      v.flushed = true;
+      await v.decoder.flush();
+    }
   };
   // a seek bumps gen and takes the guard back; this stale run must not clear it
   run().then(() => { if (v.gen === gen) v.pumping = false; }, e => { v.fail = e; v.pumping = false; });
