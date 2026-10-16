@@ -132,16 +132,10 @@ const accept = async (file) => {
       J.video.drop(id);
       return { name: file.name, why: T.errIdb() };
     }
-    // WebCodecs hands frames back asynchronously, so the very first draw always
-    // misses and the renderer — which only warns — would paint an empty frame.
-    // Decoding the first GOP here makes the frame there before the reel reaches it.
-    try {
-      await J.video.ready(id, 0);
-      warmReel.add(id);
-    } catch (e) {
-      J.video.drop(id);
-      return { name: file.name, why: `${file.name}: ${e.message}` };
-    }
+    // Only the first clip plays first, and it plays the moment the preview starts, so
+    // it is the one that has to be decoded before playback. The rest are warmed by
+    // warmAhead a whole clip before the reel reaches them.
+    if (!assets().some(isVideo)) await J.video.ready(id, 0);
     return { asset: { id, name: file.name, type: file.type, w: info.w, h: info.h, dur: info.dur } };
   }
   let bmp;
@@ -172,6 +166,9 @@ J.bgImport = async (files, onStep) => {
   }
   const list = need();
   for (const a of out) list.push(a);
+  // the reel opens on its first clip, so the player is built here and not inside the
+  // first draw: drawMedia is synchronous and cannot wait for the IndexedDB read
+  playerFor(list.find(isVideo));
   return { added: out, bad };
 };
 
@@ -181,6 +178,7 @@ J.bgRemove = async (id) => {
   const asset = list[i];
   list.splice(i, 1);
   if (isVideo(asset)) J.video.drop(id);
+  closePlayer(id);
   const bmp = decoded.get(id);
   if (bmp) bmp.close();
   decoded.delete(id);
@@ -219,12 +217,69 @@ J.bgVideoAt = (tSec) => {
   return { asset: last, local: Math.max(0, last.dur - 1e-3) };   // past the reel: hold the last frame
 };
 
-/* WebCodecs delivers frames asynchronously and the render is synchronous, so the
-   first draw of a cold clip always misses and the renderer — which only warns —
-   would paint an empty frame. Import warms the first clip; the rest are warmed
-   one clip ahead, which is a whole clip of playback before they are needed. */
+/* ------------------------------------------------------------ preview player */
+/* The preview plays through a real <video>: the browser owns the decode, so there is
+   never a frame to wait for and the background can never come up empty. The export
+   renders frame by frame and cannot wait on a seek, so it stays on J.video below.
+   `<video>` applies the tkhd rotation itself, which is why the preview passes rot 0. */
+const players = new Map();                 // id -> <video>
+const pendingPlayers = new Map();          // id -> promise, so two draws share one load
+
+const openPlayer = async (asset) => {
+  const el = document.createElement('video');
+  el.muted = true; el.playsInline = true; el.preload = 'auto';
+  el.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
+  document.body.appendChild(el);
+  players.set(asset.id, el);
+  const blob = await idbGet('bg:' + asset.id);
+  if (!blob) { players.delete(asset.id); el.remove(); throw new Error(`${asset.name} is missing from IndexedDB`); }
+  el.src = URL.createObjectURL(blob);
+  // a load that never lands would leave the background blank with nothing on screen, so the
+  // failure is named and thrown instead of sitting at readyState 0 forever
+  await new Promise((res, rej) => {
+    el.addEventListener('loadeddata', res, { once: true });
+    el.addEventListener('error', () => rej(new Error(`${asset.name} would not play in this browser: ${el.error ? el.error.message : 'media error ' + el.error.code}`)), { once: true });
+  });
+  return el;
+};
+
+/* Sync by contract — drawMedia is inside R.frame. Returns null while the element
+   still has no frame; the caller throws, which the renderer turns into a skip. */
+const playerFor = (asset) => {
+  if (!asset) return null;                   // the last clip of the reel has no next one
+  const el = players.get(asset.id);
+  if (!el) {
+    if (!pendingPlayers.has(asset.id)) {
+      pendingPlayers.set(asset.id, openPlayer(asset)
+        .catch(e => console.warn('bg preview', asset.name, e))
+        .finally(() => pendingPlayers.delete(asset.id)));
+    }
+    return null;
+  }
+  return el.readyState >= 2 ? el : null;
+};
+
+const closePlayer = (id) => {
+  const el = players.get(id);
+  if (!el) return;
+  players.delete(id);
+  el.pause();
+  el.removeAttribute('src');
+  el.load();
+  el.remove();
+};
+
+/* The clip on screen and the one after it are the only ones reachable going forward,
+   so the players behind are dropped; each one holds a whole decoded clip in memory. */
+const trimPlayers = (reels, at) => {
+  for (let i = 0; i < at - 1; i++) closePlayer(reels[i].id);
+};
+
+/* WebCodecs delivers frames asynchronously and the export render is synchronous, so
+   the first draw of a cold clip misses. Each clip is warmed once, from its own start,
+   a whole clip of playback before the reel reaches it. */
 const warmReel = new Set();
-const warmAhead = (asset) => {
+const warmAhead = asset => {
   if (!asset || warmReel.has(asset.id)) return;
   warmReel.add(asset.id);
   J.video.ready(asset.id, 0).catch(e => console.warn('bg warm', asset.name, e));
@@ -233,15 +288,15 @@ const warmAhead = (asset) => {
 /* re-read the bytes after a reload: the metadata is in the project, the picture is not */
 J.bgRestore = async () => {
   const list = assets();
+  let warmed = false;
   for (const a of list) {
-    if (decoded.has(a.id)) continue;
     const blob = await idbGet('bg:' + a.id);
     if (!blob) throw new Error(`99_custom_bgs: ${a.name} is missing from IndexedDB`);
     if (isVideo(a)) {
-      await J.video.open(a.id, await blob.arrayBuffer());
-      await J.video.ready(a.id, 0);   // same warm-up as import: the first draw must not miss
+      if (!decoded.has(a.id)) await J.video.open(a.id, await blob.arrayBuffer());
+      if (!warmed) { warmed = true; playerFor(a); }   // the reel opens on the first clip: t=0 must have a frame
     }
-    else decoded.set(a.id, await createImageBitmap(blob));
+    else if (!decoded.has(a.id)) decoded.set(a.id, await createImageBitmap(blob));
   }
 };
 
@@ -261,16 +316,42 @@ const drawMedia = env => {
   if (!cut) throw new Error('99_custom_bgs: background media needs a cut to rotate over');
   const reel = J.bgVideoAt(env.t);
   const asset = reel ? reel.asset : J.bgForLine(cut.line);
-  if (reel) {
-    const reels = assets().filter(isVideo);
-    warmAhead(reels[reels.indexOf(reel.asset) + 1]);
-  }
   const vid = isVideo(asset);
-  const img = vid ? J.video.frame(asset.id, reel.local) : decoded.get(asset.id);
+  // the preview canvas is the one on screen; the export builds its own, detached
+  const live = env.ctx.canvas.isConnected;
+  let img, rot = 0;
+  if (vid && reel && live) {
+    const reels = assets().filter(isVideo);
+    const at = reels.indexOf(reel.asset);
+    const el = playerFor(reel.asset);
+    if (el) {
+      // let it play in step; only jump the playhead when the editor was scrubbed
+      if (Math.abs(el.currentTime - reel.local) > 0.3) el.currentTime = reel.local;
+      if (el.paused) el.play().catch(() => {});
+      img = el;
+    }
+    playerFor(reels[at + 1]);               // start loading the next clip well ahead
+    trimPlayers(reels, at);
+    if (!img) throw new Error(`99_custom_bgs: ${asset.name} has no frame yet`);
+  }
+  else if (vid) {
+    if (reel) {
+      const reels = assets().filter(isVideo);
+      const at = reels.indexOf(reel.asset);
+      warmAhead(reel.asset);
+      warmAhead(reels[at + 1]);
+      for (let i = 0; i < at - 1; i++) { J.video.release(reels[i].id); warmReel.delete(reels[i].id); }
+    }
+    img = J.video.frame(asset.id, reel.local);
+    rot = J.video.rotation(asset.id);
+    if (!img) throw new Error(`99_custom_bgs: ${asset.name} is not decoded yet`);
+  }
+  else img = decoded.get(asset.id);
   if (!img) throw new Error(`99_custom_bgs: ${asset.name} is not decoded yet`);
-  const rot = vid ? J.video.rotation(asset.id) : 0;
   const ctx = env.ctx, W = env.W, H = env.H, u = H / 1080;
-  const iw = vid ? img.displayWidth : img.width, ih = vid ? img.displayHeight : img.height;
+  const el = img instanceof HTMLVideoElement;     // <video> reports the oriented size, so rot stays 0
+  const iw = el ? img.videoWidth : vid ? img.displayWidth : img.width;
+  const ih = el ? img.videoHeight : vid ? img.displayHeight : img.height;
   const down = isDownbeat(env);
   const pulse = env.beat && env.beat.since < 0.25 ? 0.9 * Math.exp(-env.beat.since * 16) : 0;
   const prog = J.clamp((env.t - cut.start) / Math.max(0.1, cut.dur));

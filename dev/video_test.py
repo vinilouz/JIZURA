@@ -132,7 +132,7 @@ async () => {
 DRAW = r"""
 async () => {
   const cv = document.createElement('canvas'); cv.width = 320; cv.height = 180;
-  const ctx = cv.getContext('2d');
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
   const plan = J.plan(window.__p, null);
   const hueAt = (line, t) => {
     ctx.clearRect(0, 0, 320, 180);
@@ -154,6 +154,50 @@ async () => {
   out.line1 = hueAt(1, 1.2);                      // line 1 rotates to the picture (still.png)
   await J.video.ready(v.id, 1.2);
   out.line2 = hueAt(2, 1.2);                      // line 2 wraps back to the video
+  return out;
+}
+"""
+
+# the preview path: a canvas that is on screen, so the background is drawn through a
+# real <video> and not through the WebCodecs window that the export uses
+PREVIEW = r"""
+async () => {
+  const cv = document.createElement('canvas'); cv.width = 320; cv.height = 180;
+  document.body.appendChild(cv);                    // connected: this is what picks the preview path
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  const plan = J.plan(window.__p, null);
+  const sample = () => {
+    const d = ctx.getImageData(4, 4, 32, 32).data;
+    let r = 0, g = 0, b = 0;
+    for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i+1]; b += d[i+2]; }
+    const n = d.length / 4;
+    return [Math.round(r/n), Math.round(g/n), Math.round(b/n)];
+  };
+  const out = {};
+  const t0 = performance.now();
+  // each step is a jump of more than 0.3 s, so the draw is forced to seek instead of
+  // letting the player drift; a seek parks currentTime exactly on t and the seek has
+  // to settle before the frame at t is the one on the canvas
+  for (const t of [1.2, 0.2, 1.7, 0.7]) {
+    let px = null, err = null, readyAt = null;
+    for (let i = 0; i < 400; i++) {
+      ctx.clearRect(0, 0, 320, 180);
+      const cut = { line: 0, start: t, dur: 2, seed: 2 };
+      try { J.BG.media.draw({ ctx, W: 320, H: 180, t, cut, beat: null, plan }, {}); }
+      catch (e) { err = e.message; }
+      const el = document.querySelector('video');
+      if (readyAt === null && el && el.readyState >= 2) readyAt = Math.round(performance.now() - t0);
+      if (!err && el && !el.seeking && el.currentTime >= t - 0.001) { px = sample(); break; }
+      await new Promise(r => setTimeout(r, 20));
+    }
+    out['t' + t] = px || ('no frame: ' + err);
+    if (readyAt !== null) out.readyAfterMs = readyAt;
+  }
+  out.players = document.querySelectorAll('video').length;
+  const el = document.querySelector('video');
+  out.state = el ? { ready: el.readyState, net: el.networkState, err: el.error && el.error.code,
+                     src: el.currentSrc.slice(0, 24), w: el.videoWidth, h: el.videoHeight } : null;
+  cv.remove();
   return out;
 }
 """
@@ -196,7 +240,8 @@ async def main():
         b = await pw.chromium.launch(args=['--allow-file-access-from-files'])
         pg = await b.new_page()
         errs = []
-        pg.on('console', lambda m: errs.append(m.type + ': ' + m.text) if m.type == 'error' else None)
+        # warnings count too: a swallowed warn is how "the background never showed" hid for days
+        pg.on('console', lambda m: errs.append(m.type + ': ' + m.text) if m.type in ('error', 'warning') else None)
         pg.on('pageerror', lambda e: errs.append('pageerror: ' + str(e)))
         await pg.goto(PAGE)
         await pg.wait_for_function('window.J && window.T')
@@ -213,6 +258,7 @@ async def main():
             await b.close()
             fail('the clip was not imported: ' + json.dumps(imported))
         decode = await pg.evaluate(DECODE)
+        preview = await pg.evaluate(PREVIEW)
         draw = await pg.evaluate(DRAW)
         nodec = await pg.evaluate(NO_DECODER)
         drop = await pg.evaluate(DROP)
@@ -222,6 +268,7 @@ async def main():
 
 
     print('decode  ', json.dumps(decode))
+    print('preview ', json.dumps(preview))
     print('draw    ', json.dumps(draw))
     print('noDec   ', json.dumps(nodec))
     print('drop    ', json.dumps(drop))
@@ -273,6 +320,12 @@ async def main():
     for k, v in want_hue.items():
         if hue(draw[k]) != v:
             fail(f'wrong colour at {k}s (expected {v}): ' + json.dumps(draw))
+        if not isinstance(preview[k], list):
+            fail(f'preview drew no frame at {k}s: ' + json.dumps(preview))
+        if hue(preview[k]) != v:
+            fail(f'preview drew the wrong colour at {k}s (expected {v}): ' + json.dumps(preview))
+    if preview['players'] != 1:
+        fail('the preview leaked <video> elements: ' + json.dumps(preview))
     if hue(draw['line1']) != 'm' and max(draw['line1']) - min(draw['line1']) < 60:
         fail('line 1 did not draw the picture: ' + json.dumps(draw))
     if hue(draw['line2']) != hue(draw['t1.2']):

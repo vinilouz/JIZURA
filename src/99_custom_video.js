@@ -23,11 +23,13 @@ if (typeof J !== 'object') throw new Error('99_custom_video: J is missing — lo
 if (!J.Renderer) throw new Error('99_custom_video: J.Renderer is missing — the frame hook cannot be installed');
 
 /* ------------------------------------------------------------ window sizes */
-/* The spike measured 5.3 s of 1080p lookahead for ONE clip. A reel keeps every
-   clip's window alive at once, so 19 clips at 720p held ~3 GB of VideoFrames and
-   the decoder stopped keeping up with the playhead. 0.8 s is ~19 frames of
-   24 fps — still six times what one render step advances. */
-const WINDOW_US = 800000;
+/* Playback lookahead. The decoder delivers frames asynchronously, so the render
+   asks for a frame that is only "fed" a little later; too short a runway and the
+   background goes empty. 2.5 s is ~60 frames of 24 fps. */
+const WINDOW_US = 2500000;
+/* Import warm-up only needs the reel's first moments decoded, so it uses a short
+   runway — every clip is warmed at import, and a full window each would be GBs. */
+const WARM_US = 400000;
 const FEED_MAX = 24;          // chunks queued in the decoder at once
 const KEEP_US = 500000;       // frames kept behind the playhead (seek jitter)
 const SEEK_JUMP_US = 500000;  // a forward jump larger than this is a seek, not playback
@@ -241,7 +243,8 @@ J.video = {
       bytes: buffer.byteLength, fed: 0, seeks: 0, gen: 0, flushed: false,
     };
     const dec = new VideoDecoder({
-      output: frame => { v.outputs.set(frame.timestamp, frame); },
+      // seek keeps the window, so a refeed overwrites timestamps already held: close the old frame
+      output: frame => { const old = v.outputs.get(frame.timestamp); if (old) old.close(); v.outputs.set(frame.timestamp, frame); },
       error: e => { v.fail = e; },
     });
     dec.configure(cfg);
@@ -255,6 +258,9 @@ J.video = {
 
   /* the 0/90/180/270 degrees tkhd asks for, in degrees */
   rotation(id) { return must(id).t.rotation; },
+
+  /* short window for warming every clip at import; a full window each is gigabytes */
+  WARM_US,
 
   /* The frame covering `tSec`. Synchronous by contract: the caller is inside
      R.frame. If it is not decoded yet this throws — never an older frame. */
@@ -281,22 +287,45 @@ J.video = {
   },
 
   /* Advances the pump until the frame at `tSec` exists. Used by the tests and
-     by anything that can await before drawing. */
-  async ready(id, tSec) {
+     by anything that can await before drawing. `depth` shortens the window, which
+     is what import uses: every clip gets warmed there, and a full window each
+     would be gigabytes of VideoFrames. */
+  async ready(id, tSec, depth) {
     const v = must(id);
     if (v.fail) throw v.fail;
     const us = Math.round(tSec * 1e6);
     if (v.playhead < 0 || us < v.playhead || us > v.playhead + SEEK_JUMP_US) seek(v, us);
     v.playhead = us;
-    pump(v);
-    for (let spin = 0; spin < 2000; spin++) {
+    const win = depth || WINDOW_US;
+    for (let spin = 0; spin < 4000; spin++) {
       if (v.fail) throw v.fail;
-      pump(v);                     // re-arm every pass: a seek hands the guard back
-      const i = indexAt(v.t, us);
+      pump(v, depth);              // re-arm every pass: a seek hands the guard back
+      // wait for the FAR end of the window, not just `tSec`: returning on the first
+      // frame leaves the rest of the window for the render to decode in real time,
+      // and the renderer asks for a frame the decoder has not produced yet.
+      const i = indexAt(v.t, us + win);
       if (v.outputs.get(v.t.ts[i])) return;
       await new Promise(r => setTimeout(r, 2));
     }
     throw new Error(`99_custom_video: the decoder produced no frame for ${tSec.toFixed(3)}s`);
+  },
+
+  /* Frees the frames of a clip the reel has left behind. The decoder stays open
+     and the playhead is reset, so playing that clip again decodes it again. */
+  release(id) {
+    const v = vids.get(id);
+    if (!v) return 0;
+    const held = v.outputs.size;
+    for (const f of v.outputs.values()) f.close();
+    v.outputs.clear();
+    v.decoder.reset();          // otherwise queued chunks still land in outputs after this
+    v.decoder.configure(v.cfg);
+    v.next = 0;
+    v.playhead = -1;
+    v.flushed = false;
+    v.gen++;
+    v.pumping = false;
+    return held;
   },
 
   drop(id) {
@@ -351,8 +380,8 @@ const seek = (v, us) => {
   const i = indexAt(v.t, us);
   let k = v.t.keys[0];
   for (const idx of v.t.keys) { if (idx > i) break; k = idx; }
-  for (const f of v.outputs.values()) f.close();
-  v.outputs.clear();
+  // the draw warms the current clip from 0 in the same tick as frame(local): clearing here
+  // deletes the window frame() is about to read, so the decoded frames stay while only the decoder restarts
   v.decoder.reset();
   v.decoder.configure(v.cfg);
   v.next = k;
@@ -369,13 +398,13 @@ const seek = (v, us) => {
    It polls the queue instead of parking on an output promise: reset() during a
    seek drops the queued chunks silently, which would leave such a promise
    unresolved forever and the pump dead. */
-const pump = v => {
+const pump = (v, depth) => {
   if (v.pumping || v.fail) return;
   v.pumping = true;
   const gen = v.gen;
   const run = async () => {
     // ts is in decode order, so the feed limit comes from the presentation index
-    const upto = feedTo(v.t, v.playhead + WINDOW_US);
+    const upto = feedTo(v.t, v.playhead + (depth || WINDOW_US));
     while (!v.fail && v.gen === gen && v.next <= upto) {
       if (v.decoder.decodeQueueSize >= FEED_MAX) { await tick(); continue; }
       v.decoder.decode(chunk(v, v.next));
