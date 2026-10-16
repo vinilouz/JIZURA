@@ -38658,9 +38658,13 @@ const openPlayer = async (asset) => {
   el.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
   document.body.appendChild(el);
   players.set(asset.id, el);
-  const blob = await idbGet('bg:' + asset.id);
-  if (!blob) { players.delete(asset.id); el.remove(); throw new Error(`${asset.name} is missing from IndexedDB`); }
-  el.src = URL.createObjectURL(blob);
+  if (asset.url) {
+    el.src = asset.url;
+  } else {
+    const blob = await idbGet('bg:' + asset.id);
+    if (!blob) { players.delete(asset.id); el.remove(); throw new Error(`${asset.name} is missing from IndexedDB`); }
+    el.src = URL.createObjectURL(blob);
+  }
   // a load that never lands would leave the background blank with nothing on screen, so the
   // failure is named and thrown instead of sitting at readyState 0 forever
   await new Promise((res, rej) => {
@@ -38861,6 +38865,9 @@ J.bgRegisterDirect = (asset, bmpOrInfo) => {
   const list = need();
   list.push(asset);
   if (bmpOrInfo && !isVideo(asset)) decoded.set(asset.id, bmpOrInfo);
+  if (isVideo(asset) && asset.url) {
+    playerFor(asset);
+  }
 };
 J.bgClearDirect = () => {
   const list = assets();
