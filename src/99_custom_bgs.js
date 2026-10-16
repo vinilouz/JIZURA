@@ -204,19 +204,29 @@ J.bgForLine = (line) => {
   return list[((l % list.length) + list.length) % list.length];
 };
 
-/* Videos are one continuous reel instead of a per-line rotation: the clips play
-   back to back in import order, each covering its own duration from t=0. The
-   pictures keep the rotation, which is what the panel documents. */
+/* Videos are one continuous reel that loops when the song is longer than the clips */
 J.bgVideoAt = (tSec) => {
   const reels = assets().filter(isVideo);
   if (!reels.length) return null;
+  const totalDur = reels.reduce((sum, a) => sum + (a.dur || 0), 0);
+  if (!(totalDur > 0)) return null;
+  const t = tSec % totalDur;
   let acc = 0;
   for (const a of reels) {
-    if (tSec < acc + a.dur) return { asset: a, local: Math.max(0, tSec - acc) };
+    if (t < acc + a.dur) return { asset: a, local: Math.max(0, t - acc) };
     acc += a.dur;
   }
   const last = reels[reels.length - 1];
-  return { asset: last, local: Math.max(0, last.dur - 1e-3) };   // past the reel: hold the last frame
+  return { asset: last, local: 0 };
+};
+
+/* Pre-synchronize video decoding before drawing a frame (used by export & snapshots) */
+J.ensureBgReady = async (tSec) => {
+  if (typeof J.bgVideoAt !== 'function' || !J.video || typeof J.video.ready !== 'function') return;
+  const reel = J.bgVideoAt(tSec);
+  if (reel && reel.asset) {
+    await J.video.ready(reel.asset.id, reel.local, 0);
+  }
 };
 
 /* ------------------------------------------------------------ preview player */
@@ -340,8 +350,7 @@ const drawMedia = env => {
     if (reel) {
       const reels = assets().filter(isVideo);
       const at = reels.indexOf(reel.asset);
-      warmAhead(reel.asset);
-      warmAhead(reels[at + 1]);
+      if (reels[at + 1]) warmAhead(reels[at + 1]);
       for (let i = 0; i < at - 1; i++) { J.video.release(reels[i].id); warmReel.delete(reels[i].id); }
     }
     img = J.video.frame(asset.id, reel.local);
@@ -430,6 +439,23 @@ J.plan = (project, audio) => {
   const p = plan(project, audio);
   if (assets().length) for (const c of p.cuts) { c.bgFx = c.bg; c.bg = 'media'; }
   return p;
+};
+
+/* Expose direct in-memory asset hooks for headless / programmatic usage (no IDB, no DOM) */
+J.bgRegisterDirect = (asset, bmpOrInfo) => {
+  const list = need();
+  list.push(asset);
+  if (bmpOrInfo && !isVideo(asset)) decoded.set(asset.id, bmpOrInfo);
+};
+J.bgClearDirect = () => {
+  const list = assets();
+  for (const a of list) {
+    if (isVideo(a)) J.video.drop(a.id);
+    const bmp = decoded.get(a.id);
+    if (bmp) bmp.close();
+  }
+  decoded.clear();
+  if (current) current.bgAssets = [];
 };
 
 /* A layer above re-plans from a clone whose overrides are a fresh shallow copy,

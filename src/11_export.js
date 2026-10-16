@@ -187,7 +187,9 @@ async function encodeMP4({ plan, project, audio, onProgress, signal, range, file
       if (signal && signal.aborted) { closeEnc(); throw new Error('キャンセルしました'); }
       if (err) throw err;
       if (venc.state === 'closed') throw new Error('エンコーダーが停止しました');
-      R.frame(ctx, plan, span.t0 + i / fps, { scale });
+      const t = span.t0 + i / fps;
+      if (J.ensureBgReady) await J.ensureBgReady(t);
+      R.frame(ctx, plan, t, { scale });
       const vf = new VideoFrame(canvas, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round(1e6 / fps) });
       try { venc.encode(vf, { keyFrame: i % (fps * 2) === 0 }); } finally { vf.close(); }
       let spins = 0;
@@ -284,7 +286,9 @@ J.exportPNGZip = async ({ plan, project, transparent, layers, onProgress, signal
     if (signal && signal.aborted) throw new Error('キャンセルしました');
     const name = `jizura_${String(i).padStart(5, '0')}.png`;
     for (const layer of layers ? ['back', 'front'] : [null]) {
-      R.frame(ctx, plan, span.t0 + i / fps, { scale, transparent: transparent || !!layers, layer });
+      const t = span.t0 + i / fps;
+      if (J.ensureBgReady) await J.ensureBgReady(t);
+      R.frame(ctx, plan, t, { scale, transparent: transparent || !!layers, layer });
       const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
       zip.add((layer ? layer + '/' : '') + name, new Uint8Array(await blob.arrayBuffer()));
     }

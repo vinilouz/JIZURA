@@ -1,0 +1,4057 @@
+{
+  "styles": [
+    {
+      "id": "noir",
+      "name": "ノワール・クロマ",
+      "desc": "黒地・白文字・シアン/琥珀の色ズレ",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#060607",
+          "fg": "#F5EEEA",
+          "sub": "#BDB6B2",
+          "accent": "#F5A50C",
+          "accent2": "#16F4D4",
+          "ink": "#F5EEEA",
+          "ghostA": "#F5A50C",
+          "ghostB": "#16F4D4"
+        },
+        {
+          "bg": "#F2EDE8",
+          "fg": "#0B0B0C",
+          "sub": "#4A4644",
+          "accent": "#E0600C",
+          "accent2": "#0FAE98",
+          "ink": "#0B0B0C",
+          "ghostA": "#F5A50C",
+          "ghostB": "#16C4B4"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "gothic_black",
+          "dela",
+          "zenkaku"
+        ],
+        "serif": [
+          "mincho_light",
+          "mincho"
+        ],
+        "body": [
+          "gothic_med"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "crimson",
+      "name": "クリムゾン・シグナル",
+      "desc": "深紅地・白と黒の二段組み・データ破損",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#C8103F",
+          "fg": "#FFFFFF",
+          "sub": "#FFD9E2",
+          "accent": "#140509",
+          "accent2": "#39F2C8",
+          "ink": "#140509",
+          "ghostA": "#FFFFFF",
+          "ghostB": "#39F2C8"
+        },
+        {
+          "bg": "#FF6F98",
+          "fg": "#FFFFFF",
+          "sub": "#FFE3EB",
+          "accent": "#1A0710",
+          "accent2": "#39F2C8",
+          "ink": "#1A0710",
+          "ghostA": "#FFFFFF",
+          "ghostB": "#1A0710"
+        },
+        {
+          "bg": "#150509",
+          "fg": "#FF3D6E",
+          "sub": "#FF9DB6",
+          "accent": "#FFFFFF",
+          "accent2": "#39F2C8",
+          "ink": "#FF3D6E",
+          "ghostA": "#FF3D6E",
+          "ghostB": "#39F2C8"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "gothic_black",
+          "zenkaku"
+        ],
+        "serif": [
+          "mincho"
+        ],
+        "body": [
+          "gothic_med",
+          "sansui"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "caution",
+      "name": "コーション",
+      "desc": "黄色地・赤と青のアクセント・計器UI",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#F4D21F",
+          "fg": "#141414",
+          "sub": "#3A3510",
+          "accent": "#E0231C",
+          "accent2": "#1F3FD8",
+          "ink": "#141414",
+          "ghostA": "#E0231C",
+          "ghostB": "#1F3FD8"
+        },
+        {
+          "bg": "#E0231C",
+          "fg": "#F4D21F",
+          "sub": "#FFE9A0",
+          "accent": "#141414",
+          "accent2": "#FFFFFF",
+          "ink": "#141414",
+          "ghostA": "#141414",
+          "ghostB": "#F4D21F"
+        },
+        {
+          "bg": "#18181A",
+          "fg": "#F4D21F",
+          "sub": "#DDD6B0",
+          "accent": "#E0231C",
+          "accent2": "#FFFFFF",
+          "ink": "#F4D21F",
+          "ghostA": "#E0231C",
+          "ghostB": "#1F3FD8"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "mincho_black",
+          "gothic_black"
+        ],
+        "serif": [
+          "mincho_black",
+          "mincho_bold"
+        ],
+        "body": [
+          "gothic_bold"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "magenta",
+      "name": "ポップ・マゼンタ",
+      "desc": "ショッキングピンク×白・太丸ゴシック・引き出し線",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#FF0A8C",
+          "fg": "#FFFFFF",
+          "sub": "#FFD2EA",
+          "accent": "#FFFFFF",
+          "accent2": "#2B2BD9",
+          "ink": "#FFFFFF",
+          "ghostA": "#FF8CC8",
+          "ghostB": "#2B2BD9"
+        },
+        {
+          "bg": "#FFFFFF",
+          "fg": "#FF0A8C",
+          "sub": "#FF6DB6",
+          "accent": "#2B2BD9",
+          "accent2": "#FF0A8C",
+          "ink": "#FF0A8C",
+          "ghostA": "#2B2BD9",
+          "ghostB": "#FF8CC8"
+        },
+        {
+          "bg": "#2B2BD9",
+          "fg": "#FFFFFF",
+          "sub": "#C9C9FF",
+          "accent": "#FF0A8C",
+          "accent2": "#FFFFFF",
+          "ink": "#FFFFFF",
+          "ghostA": "#FF0A8C",
+          "ghostB": "#FFFFFF"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "round",
+          "pop",
+          "gothic_black"
+        ],
+        "serif": [
+          "mincho_bold"
+        ],
+        "body": [
+          "round",
+          "gothic_bold"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "paper",
+      "name": "ペーパー・インク",
+      "desc": "紙の質感・藍とマゼンタ・明朝の残像",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#ECE9E3",
+          "fg": "#1B2350",
+          "sub": "#4D5270",
+          "accent": "#C2185B",
+          "accent2": "#111111",
+          "ink": "#111111",
+          "ghostA": "#C2185B",
+          "ghostB": "#1B2350"
+        },
+        {
+          "bg": "#151515",
+          "fg": "#F0EDE7",
+          "sub": "#B8B4AC",
+          "accent": "#C2185B",
+          "accent2": "#1B2350",
+          "ink": "#F0EDE7",
+          "ghostA": "#C2185B",
+          "ghostB": "#3A4690"
+        },
+        {
+          "bg": "#C2185B",
+          "fg": "#FFFFFF",
+          "sub": "#F6C6D8",
+          "accent": "#1B2350",
+          "accent2": "#111111",
+          "ink": "#1B2350",
+          "ghostA": "#1B2350",
+          "ghostB": "#FFFFFF"
+        },
+        {
+          "bg": "#1B2350",
+          "fg": "#F0EDE7",
+          "sub": "#AEB2CC",
+          "accent": "#C2185B",
+          "accent2": "#FFFFFF",
+          "ink": "#F0EDE7",
+          "ghostA": "#C2185B",
+          "ghostB": "#FFFFFF"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "mincho_black",
+          "tokumin"
+        ],
+        "serif": [
+          "mincho_black",
+          "mincho_bold"
+        ],
+        "body": [
+          "mincho"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "hud",
+      "name": "ダークHUD",
+      "desc": "炭色地・細線フレーム・橙の差し色・日食",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#131315",
+          "fg": "#EFEDEA",
+          "sub": "#8E8B88",
+          "accent": "#F25A2B",
+          "accent2": "#FFFFFF",
+          "ink": "#EFEDEA",
+          "ghostA": "#F25A2B",
+          "ghostB": "#7FD7FF"
+        },
+        {
+          "bg": "#0B0B0C",
+          "fg": "#FFFFFF",
+          "sub": "#9A9796",
+          "accent": "#F25A2B",
+          "accent2": "#FFFFFF",
+          "ink": "#F25A2B",
+          "ghostA": "#F25A2B",
+          "ghostB": "#FFFFFF"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "gothic_black",
+          "zenkaku"
+        ],
+        "serif": [
+          "mincho_bold",
+          "mincho_light"
+        ],
+        "body": [
+          "gothic_med"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "mint",
+      "name": "ミント・ターミナル",
+      "desc": "黒×青緑×ライム・ラベル貼り・スリットスキャン",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#0A0E0D",
+          "fg": "#E6FFF5",
+          "sub": "#7FB9A8",
+          "accent": "#9CFF3A",
+          "accent2": "#2E8C74",
+          "ink": "#E6FFF5",
+          "ghostA": "#FF3B6B",
+          "ghostB": "#2EE6C8"
+        },
+        {
+          "bg": "#3FAE93",
+          "fg": "#0A0E0D",
+          "sub": "#123A31",
+          "accent": "#FFFFFF",
+          "accent2": "#9CFF3A",
+          "ink": "#0A0E0D",
+          "ghostA": "#FFFFFF",
+          "ghostB": "#0A0E0D"
+        },
+        {
+          "bg": "#F2F2EE",
+          "fg": "#0A0E0D",
+          "sub": "#40504B",
+          "accent": "#2E8C74",
+          "accent2": "#9CFF3A",
+          "ink": "#0A0E0D",
+          "ghostA": "#2E8C74",
+          "ghostB": "#9CFF3A"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "gothic_black",
+          "dela"
+        ],
+        "serif": [
+          "mincho"
+        ],
+        "body": [
+          "gothic_med",
+          "sansui"
+        ],
+        "mono": [
+          "mono",
+          "dot"
+        ]
+      }
+    },
+    {
+      "id": "specimen",
+      "name": "スペシメン",
+      "desc": "墨色地・明朝・辞書の注釈と引き出し線",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#1B1A1C",
+          "fg": "#F2F0EC",
+          "sub": "#A19E99",
+          "accent": "#F2F0EC",
+          "accent2": "#C8B98C",
+          "ink": "#F2F0EC",
+          "ghostA": "#6E6A66",
+          "ghostB": "#C8B98C"
+        },
+        {
+          "bg": "#F2F0EC",
+          "fg": "#1B1A1C",
+          "sub": "#5E5B57",
+          "accent": "#1B1A1C",
+          "accent2": "#8A7A4E",
+          "ink": "#1B1A1C",
+          "ghostA": "#B9B4AD",
+          "ghostB": "#8A7A4E"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "mincho_bold",
+          "mincho_black"
+        ],
+        "serif": [
+          "mincho",
+          "mincho_light"
+        ],
+        "body": [
+          "mincho"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "transit",
+      "name": "トランジット",
+      "desc": "オリーブ×黄色・矢印と標識・網点",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#5B582B",
+          "fg": "#FFFFFF",
+          "sub": "#E6E2BC",
+          "accent": "#E8C21A",
+          "accent2": "#1A1A1A",
+          "ink": "#E8C21A",
+          "ghostA": "#E8C21A",
+          "ghostB": "#1A1A1A"
+        },
+        {
+          "bg": "#1A1A1A",
+          "fg": "#FFFFFF",
+          "sub": "#B8B5A0",
+          "accent": "#E8C21A",
+          "accent2": "#FFFFFF",
+          "ink": "#E8C21A",
+          "ghostA": "#E8C21A",
+          "ghostB": "#7C7A55"
+        },
+        {
+          "bg": "#9C9A94",
+          "fg": "#FFFFFF",
+          "sub": "#F0EEE6",
+          "accent": "#E8C21A",
+          "accent2": "#1A1A1A",
+          "ink": "#1A1A1A",
+          "ghostA": "#E8C21A",
+          "ghostB": "#1A1A1A"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "zenkaku",
+          "gothic_black"
+        ],
+        "serif": [
+          "mincho_bold"
+        ],
+        "body": [
+          "gothic_bold"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "blueprint",
+      "name": "ブループリント",
+      "desc": "鮮青×白×黒・図形コラージュ・斜め帯",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#1B1BE8",
+          "fg": "#FFFFFF",
+          "sub": "#C7C7FF",
+          "accent": "#000000",
+          "accent2": "#FFFFFF",
+          "ink": "#000000",
+          "ghostA": "#000000",
+          "ghostB": "#8C8CFF"
+        },
+        {
+          "bg": "#000000",
+          "fg": "#FFFFFF",
+          "sub": "#9A9AFF",
+          "accent": "#1B1BE8",
+          "accent2": "#FFFFFF",
+          "ink": "#1B1BE8",
+          "ghostA": "#1B1BE8",
+          "ghostB": "#FFFFFF"
+        },
+        {
+          "bg": "#FFFFFF",
+          "fg": "#1B1BE8",
+          "sub": "#5A5AF0",
+          "accent": "#000000",
+          "accent2": "#1B1BE8",
+          "ink": "#1B1BE8",
+          "ghostA": "#000000",
+          "ghostB": "#8C8CFF"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "dela",
+          "gothic_black"
+        ],
+        "serif": [
+          "mincho_bold"
+        ],
+        "body": [
+          "gothic_bold"
+        ],
+        "mono": [
+          "mono",
+          "dot"
+        ]
+      }
+    },
+    {
+      "id": "rouge",
+      "name": "ルージュ・グラデ",
+      "desc": "明るいグレー地・赤のグラデーション・カプセル",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#E4E2E0",
+          "fg": "#141414",
+          "sub": "#6B6866",
+          "accent": "#D40F1C",
+          "accent2": "#141414",
+          "ink": "#141414",
+          "ghostA": "#D40F1C",
+          "ghostB": "#6B6866"
+        },
+        {
+          "bg": "#140405",
+          "fg": "#FFFFFF",
+          "sub": "#C98A8E",
+          "accent": "#E3141F",
+          "accent2": "#FFFFFF",
+          "ink": "#E3141F",
+          "ghostA": "#E3141F",
+          "ghostB": "#FFFFFF"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "gothic_black",
+          "dela"
+        ],
+        "serif": [
+          "mincho_black"
+        ],
+        "body": [
+          "gothic_med"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "mono",
+      "name": "モノ・RGB",
+      "desc": "灰色の空間・白い明朝・強いRGB分離・座標の円",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#3B3D41",
+          "fg": "#FFFFFF",
+          "sub": "#B9BBBF",
+          "accent": "#FFFFFF",
+          "accent2": "#FFE34D",
+          "ink": "#1A1B1D",
+          "ghostA": "#FF2A2A",
+          "ghostB": "#2AA8FF"
+        },
+        {
+          "bg": "#141517",
+          "fg": "#FFFFFF",
+          "sub": "#9EA0A4",
+          "accent": "#FFE34D",
+          "accent2": "#FFFFFF",
+          "ink": "#FFFFFF",
+          "ghostA": "#FF2A2A",
+          "ghostB": "#2AFF7A"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "mincho_black",
+          "mincho_bold"
+        ],
+        "serif": [
+          "mincho_bold"
+        ],
+        "body": [
+          "mincho"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "hrRuin",
+      "name": "廃墟",
+      "desc": "褪せた緑灰色・錆の赤・明朝の残響",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#161B18",
+          "fg": "#D3DACF",
+          "sub": "#7D887E",
+          "accent": "#B0473A",
+          "accent2": "#6E8B6B",
+          "ink": "#D3DACF",
+          "ghostA": "#5E7A62",
+          "ghostB": "#8A3A30"
+        },
+        {
+          "bg": "#8C958A",
+          "fg": "#141814",
+          "sub": "#2E362F",
+          "accent": "#6A1A14",
+          "accent2": "#E4E8DF",
+          "ink": "#141814",
+          "ghostA": "#3F4D41",
+          "ghostB": "#6A1A14"
+        },
+        {
+          "bg": "#0C0F0D",
+          "fg": "#A9B8A6",
+          "sub": "#5D6B5E",
+          "accent": "#C24A3A",
+          "accent2": "#A9B8A6",
+          "ink": "#A9B8A6",
+          "ghostA": "#2F4A36",
+          "ghostB": "#5E1E18"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "mincho_black",
+          "shippori"
+        ],
+        "serif": [
+          "mincho",
+          "mincho_light"
+        ],
+        "body": [
+          "mincho_light"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "hrNightRec",
+      "name": "深夜の録画",
+      "desc": "真っ黒な画面・監視映像の白と赤・砂嵐",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#050505",
+          "fg": "#EDEDED",
+          "sub": "#8A8A8A",
+          "accent": "#E3261E",
+          "accent2": "#FFFFFF",
+          "ink": "#EDEDED",
+          "ghostA": "#6E6E6E",
+          "ghostB": "#E3261E"
+        },
+        {
+          "bg": "#0B0E0B",
+          "fg": "#D8F0D8",
+          "sub": "#6F866F",
+          "accent": "#FF3A2A",
+          "accent2": "#D8F0D8",
+          "ink": "#D8F0D8",
+          "ghostA": "#3E6B3E",
+          "ghostB": "#FF3A2A"
+        },
+        {
+          "bg": "#DADADA",
+          "fg": "#0A0A0A",
+          "sub": "#4A4A4A",
+          "accent": "#C8140E",
+          "accent2": "#0A0A0A",
+          "ink": "#0A0A0A",
+          "ghostA": "#8A8A8A",
+          "ghostB": "#C8140E"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "gothic_bold",
+          "gothic_black"
+        ],
+        "serif": [
+          "mincho"
+        ],
+        "body": [
+          "gothic_med"
+        ],
+        "mono": [
+          "mono",
+          "dot"
+        ]
+      }
+    },
+    {
+      "id": "hrCurse",
+      "name": "呪いの手紙",
+      "desc": "黄ばんだ便箋・褪せた墨・暗い赤の書き込み",
+      "extra": false,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#D8CBA4",
+          "fg": "#2A2017",
+          "sub": "#6B5B45",
+          "accent": "#7E1410",
+          "accent2": "#3F3326",
+          "ink": "#2A2017",
+          "ghostA": "#9A2A20",
+          "ghostB": "#8A7A5E"
+        },
+        {
+          "bg": "#1C140E",
+          "fg": "#E3D5B0",
+          "sub": "#9A8866",
+          "accent": "#B8261C",
+          "accent2": "#E3D5B0",
+          "ink": "#E3D5B0",
+          "ghostA": "#6E1510",
+          "ghostB": "#5A4A34"
+        },
+        {
+          "bg": "#C4B28A",
+          "fg": "#3A0D0A",
+          "sub": "#6E4A3A",
+          "accent": "#1E1812",
+          "accent2": "#7E1410",
+          "ink": "#3A0D0A",
+          "ghostA": "#7E1410",
+          "ghostB": "#6E5E44"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "klee",
+          "brush",
+          "mincho_black"
+        ],
+        "serif": [
+          "klee",
+          "mincho"
+        ],
+        "body": [
+          "klee",
+          "mincho"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "sakura",
+      "name": "サクラ",
+      "desc": "淡い桜色・深い梅紫・夜桜・丸文字と明朝",
+      "extra": true,
+      "wa": true,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#F8E4EB",
+          "fg": "#4A1434",
+          "sub": "#8A4A69",
+          "accent": "#D93A74",
+          "accent2": "#6F8F4E",
+          "ink": "#4A1434",
+          "ghostA": "#EC6A9A",
+          "ghostB": "#9A8AE6"
+        },
+        {
+          "bg": "#26091B",
+          "fg": "#FCE8F0",
+          "sub": "#D69DB6",
+          "accent": "#FF86B0",
+          "accent2": "#B9E0A2",
+          "ink": "#FCE8F0",
+          "ghostA": "#FF5C95",
+          "ghostB": "#8A78FF"
+        },
+        {
+          "bg": "#E77FA3",
+          "fg": "#3A0B26",
+          "sub": "#65173F",
+          "accent": "#3A0B26",
+          "accent2": "#FFF3F7",
+          "ink": "#3A0B26",
+          "ghostA": "#B4205A",
+          "ghostB": "#6A4CC8"
+        },
+        {
+          "bg": "#FFFAF8",
+          "fg": "#A01E4A",
+          "sub": "#B45F7E",
+          "accent": "#E0457F",
+          "accent2": "#4A1434",
+          "ink": "#A01E4A",
+          "ghostA": "#F07AA4",
+          "ghostB": "#A898EA"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "kiwi",
+          "shippori"
+        ],
+        "serif": [
+          "shippori",
+          "mincho_light"
+        ],
+        "body": [
+          "kiwi"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "ocean",
+      "name": "深海",
+      "desc": "濃紺の深海・シアンの発光・泡と細いゴシック",
+      "extra": true,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#031A2E",
+          "fg": "#E4FAFF",
+          "sub": "#7FB2C8",
+          "accent": "#1FD2E6",
+          "accent2": "#4C7DFF",
+          "ink": "#E4FAFF",
+          "ghostA": "#1FD2E6",
+          "ghostB": "#3B5BFF"
+        },
+        {
+          "bg": "#0B5566",
+          "fg": "#FFFFFF",
+          "sub": "#A9E3EA",
+          "accent": "#04182A",
+          "accent2": "#7FF3FF",
+          "ink": "#E4FAFF",
+          "ghostA": "#27E3F2",
+          "ghostB": "#031A2E"
+        },
+        {
+          "bg": "#DCF1F2",
+          "fg": "#06243A",
+          "sub": "#3E6A7C",
+          "accent": "#0A7F98",
+          "accent2": "#3B5BFF",
+          "ink": "#06243A",
+          "ghostA": "#16B4CC",
+          "ghostB": "#5A6BFF"
+        },
+        {
+          "bg": "#01060D",
+          "fg": "#7FF6FF",
+          "sub": "#3E9AAE",
+          "accent": "#FFFFFF",
+          "accent2": "#2E6BFF",
+          "ink": "#7FF6FF",
+          "ghostA": "#2E6BFF",
+          "ghostB": "#00FFC2"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "gothic_light",
+          "zenkaku"
+        ],
+        "serif": [
+          "mincho_light",
+          "mincho"
+        ],
+        "body": [
+          "sansui"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "sunset",
+      "name": "夕焼けグラデ",
+      "desc": "橙から菫へのグラデーション・太い明朝・逆光",
+      "extra": true,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#2A0F44",
+          "fg": "#FFF0DC",
+          "sub": "#E6A98F",
+          "accent": "#FF7A30",
+          "accent2": "#FF4A86",
+          "ink": "#FFB347",
+          "ghostA": "#FF7A30",
+          "ghostB": "#B84BFF"
+        },
+        {
+          "bg": "#FF8A3D",
+          "fg": "#2A0F44",
+          "sub": "#5A1F55",
+          "accent": "#2A0F44",
+          "accent2": "#FFF0DC",
+          "ink": "#2A0F44",
+          "ghostA": "#E0306A",
+          "ghostB": "#7A2BC0"
+        },
+        {
+          "bg": "#B8325F",
+          "fg": "#FFF3E4",
+          "sub": "#FFC7A8",
+          "accent": "#FFC15E",
+          "accent2": "#2A0F44",
+          "ink": "#FFF3E4",
+          "ghostA": "#FFC15E",
+          "ghostB": "#2A0F44"
+        },
+        {
+          "bg": "#FFE4CF",
+          "fg": "#3A1250",
+          "sub": "#8A4A6A",
+          "accent": "#F2562E",
+          "accent2": "#8A3FD1",
+          "ink": "#3A1250",
+          "ghostA": "#FF6A3D",
+          "ghostB": "#9A4BE0"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "tokumin",
+          "mincho_black",
+          "dela"
+        ],
+        "serif": [
+          "mincho_black",
+          "shippori"
+        ],
+        "body": [
+          "gothic_med"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "forest",
+      "name": "森の手帖",
+      "desc": "苔と生成り・樹皮の茶・鉛筆の手書き文字",
+      "extra": true,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#1D291B",
+          "fg": "#EFE9D6",
+          "sub": "#A8B08A",
+          "accent": "#B7C95A",
+          "accent2": "#C4833F",
+          "ink": "#EFE9D6",
+          "ghostA": "#8FB04A",
+          "ghostB": "#C4833F"
+        },
+        {
+          "bg": "#EDE6D1",
+          "fg": "#22301F",
+          "sub": "#5D6647",
+          "accent": "#4F7A35",
+          "accent2": "#8A5A32",
+          "ink": "#22301F",
+          "ghostA": "#6F9A45",
+          "ghostB": "#B0703A"
+        },
+        {
+          "bg": "#4A3526",
+          "fg": "#F2EAD3",
+          "sub": "#CDB894",
+          "accent": "#B7C95A",
+          "accent2": "#EFE9D6",
+          "ink": "#B7C95A",
+          "ghostA": "#8FB04A",
+          "ghostB": "#D9A441"
+        },
+        {
+          "bg": "#A9BC96",
+          "fg": "#1A2618",
+          "sub": "#34482F",
+          "accent": "#1A2618",
+          "accent2": "#F2EAD3",
+          "ink": "#1A2618",
+          "ghostA": "#4F7A35",
+          "ghostB": "#8A5A32"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "klee",
+          "shippori"
+        ],
+        "serif": [
+          "shippori",
+          "mincho"
+        ],
+        "body": [
+          "klee"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "vapor",
+      "name": "ヴェイパー",
+      "desc": "薄紫とパステルのピンク/水色・明朝・VHSのにじみ",
+      "extra": true,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#3A2A6E",
+          "fg": "#FFFFFF",
+          "sub": "#D6C8FF",
+          "accent": "#FF8FD8",
+          "accent2": "#7DF9FF",
+          "ink": "#7DF9FF",
+          "ghostA": "#FF71CE",
+          "ghostB": "#01CDFE"
+        },
+        {
+          "bg": "#FFC6EC",
+          "fg": "#3A2A6E",
+          "sub": "#74489A",
+          "accent": "#7A3BFF",
+          "accent2": "#0F9FC8",
+          "ink": "#3A2A6E",
+          "ghostA": "#2EC8F0",
+          "ghostB": "#B04BFF"
+        },
+        {
+          "bg": "#8FEAF2",
+          "fg": "#35246A",
+          "sub": "#4A3C8A",
+          "accent": "#35246A",
+          "accent2": "#FF4FC0",
+          "ink": "#35246A",
+          "ghostA": "#FF5CC8",
+          "ghostB": "#8A5CFF"
+        },
+        {
+          "bg": "#1A1030",
+          "fg": "#FFFB96",
+          "sub": "#B9A6E0",
+          "accent": "#05FFA1",
+          "accent2": "#FF71CE",
+          "ink": "#FF71CE",
+          "ghostA": "#FF71CE",
+          "ghostB": "#01CDFE"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "mincho",
+          "dot",
+          "mincho_black"
+        ],
+        "serif": [
+          "mincho_light",
+          "mincho"
+        ],
+        "body": [
+          "sansui"
+        ],
+        "mono": [
+          "dot",
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "newsprint",
+      "name": "新聞",
+      "desc": "灰色の更紙・墨と赤・見出し明朝・CMYの版ズレと網点",
+      "extra": true,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#E6E5E0",
+          "fg": "#111111",
+          "sub": "#4E4E4C",
+          "accent": "#D8141B",
+          "accent2": "#0A82C8",
+          "ink": "#111111",
+          "ghostA": "#E4007F",
+          "ghostB": "#00A0E9"
+        },
+        {
+          "bg": "#111111",
+          "fg": "#F2F2EE",
+          "sub": "#A5A5A0",
+          "accent": "#F5D300",
+          "accent2": "#E4007F",
+          "ink": "#F2F2EE",
+          "ghostA": "#E4007F",
+          "ghostB": "#00A0E9"
+        },
+        {
+          "bg": "#D8141B",
+          "fg": "#FFFFFF",
+          "sub": "#FFD6D0",
+          "accent": "#111111",
+          "accent2": "#F5D300",
+          "ink": "#FFFFFF",
+          "ghostA": "#111111",
+          "ghostB": "#F5D300"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "mincho_black",
+          "gothic_bold"
+        ],
+        "serif": [
+          "mincho_bold",
+          "mincho"
+        ],
+        "body": [
+          "mincho"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "synth80",
+      "name": "シンセ80s",
+      "desc": "黒地にネオンのマゼンタ/シアン・立体文字・走査線",
+      "extra": true,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#0B0414",
+          "fg": "#FF4FD8",
+          "sub": "#A98BFF",
+          "accent": "#22E6FF",
+          "accent2": "#FFE45C",
+          "ink": "#22E6FF",
+          "ghostA": "#22E6FF",
+          "ghostB": "#6A3BFF"
+        },
+        {
+          "bg": "#0B0414",
+          "fg": "#22E6FF",
+          "sub": "#8FA8FF",
+          "accent": "#E62EBE",
+          "accent2": "#FFE45C",
+          "ink": "#FF4FD8",
+          "ghostA": "#FF4FD8",
+          "ghostB": "#FFE45C"
+        },
+        {
+          "bg": "#1C0A3A",
+          "fg": "#FFFFFF",
+          "sub": "#FFB0E8",
+          "accent": "#E62EBE",
+          "accent2": "#22E6FF",
+          "ink": "#FFE45C",
+          "ghostA": "#FF2E88",
+          "ghostB": "#22E6FF"
+        },
+        {
+          "bg": "#FF2E88",
+          "fg": "#0B0414",
+          "sub": "#3A0A30",
+          "accent": "#0B0414",
+          "accent2": "#22E6FF",
+          "ink": "#0B0414",
+          "ghostA": "#22E6FF",
+          "ghostB": "#FFE45C"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "rampart",
+          "dela"
+        ],
+        "serif": [
+          "mincho_bold"
+        ],
+        "body": [
+          "gothic_bold"
+        ],
+        "mono": [
+          "mono",
+          "dot"
+        ]
+      }
+    },
+    {
+      "id": "kraft",
+      "name": "クラフト紙",
+      "desc": "クラフト紙と生成り・スタンプの朱と藍・マステ",
+      "extra": true,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#C49A6C",
+          "fg": "#1A1410",
+          "sub": "#46301E",
+          "accent": "#B8361B",
+          "accent2": "#F3E9D2",
+          "ink": "#1A1410",
+          "ghostA": "#C33A1F",
+          "ghostB": "#2E5E8C"
+        },
+        {
+          "bg": "#F1E6CF",
+          "fg": "#1A1410",
+          "sub": "#6A5540",
+          "accent": "#C33A1F",
+          "accent2": "#2E5E8C",
+          "ink": "#1A1410",
+          "ghostA": "#C33A1F",
+          "ghostB": "#2E5E8C"
+        },
+        {
+          "bg": "#1E1A17",
+          "fg": "#F1E6CF",
+          "sub": "#B8A68A",
+          "accent": "#D9642E",
+          "accent2": "#C49A6C",
+          "ink": "#C49A6C",
+          "ghostA": "#C49A6C",
+          "ghostB": "#C33A1F"
+        },
+        {
+          "bg": "#2E5E8C",
+          "fg": "#F6EEDD",
+          "sub": "#C9D6E2",
+          "accent": "#F1E6CF",
+          "accent2": "#C33A1F",
+          "ink": "#F1E6CF",
+          "ghostA": "#C49A6C",
+          "ghostB": "#1A1410"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "dela",
+          "zenkaku"
+        ],
+        "serif": [
+          "tokumin",
+          "mincho_bold"
+        ],
+        "body": [
+          "klee"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "candy",
+      "name": "キャンディ",
+      "desc": "ミント/いちご/レモン/ぶどうのパステル・丸く弾む文字",
+      "extra": true,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#BDF0E2",
+          "fg": "#3E2A8C",
+          "sub": "#5A4A9A",
+          "accent": "#EE3A88",
+          "accent2": "#FFB020",
+          "ink": "#3E2A8C",
+          "ghostA": "#FF5FA2",
+          "ghostB": "#8A6BFF"
+        },
+        {
+          "bg": "#FFDDEB",
+          "fg": "#7A2BB8",
+          "sub": "#A2468E",
+          "accent": "#EE3A88",
+          "accent2": "#2FC2B8",
+          "ink": "#7A2BB8",
+          "ghostA": "#FF5FA2",
+          "ghostB": "#3FB8FF"
+        },
+        {
+          "bg": "#FFF0A0",
+          "fg": "#B01E5E",
+          "sub": "#9A4A2A",
+          "accent": "#3F8FFF",
+          "accent2": "#FF5FA2",
+          "ink": "#B01E5E",
+          "ghostA": "#FF5FA2",
+          "ghostB": "#3FB8FF"
+        },
+        {
+          "bg": "#6A33B0",
+          "fg": "#FFF3FA",
+          "sub": "#E3C8FF",
+          "accent": "#FF8FC8",
+          "accent2": "#7FF0E0",
+          "ink": "#7FF0E0",
+          "ghostA": "#FF8FC8",
+          "ghostB": "#7FF0E0"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "potta",
+          "pop",
+          "round"
+        ],
+        "serif": [
+          "kiwi"
+        ],
+        "body": [
+          "round",
+          "kiwi"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "acid",
+      "name": "アシッド",
+      "desc": "黒×酸性グリーン×マゼンタ・荒い書体と壊れた画面",
+      "extra": true,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#050505",
+          "fg": "#C6FF00",
+          "sub": "#86A800",
+          "accent": "#FF2BD6",
+          "accent2": "#FFFFFF",
+          "ink": "#C6FF00",
+          "ghostA": "#FF2BD6",
+          "ghostB": "#3D5BFF"
+        },
+        {
+          "bg": "#C6FF00",
+          "fg": "#050505",
+          "sub": "#2A3A00",
+          "accent": "#050505",
+          "accent2": "#FF2BD6",
+          "ink": "#050505",
+          "ghostA": "#FF2BD6",
+          "ghostB": "#2B3DFF"
+        },
+        {
+          "bg": "#FF2BD6",
+          "fg": "#050505",
+          "sub": "#3A0030",
+          "accent": "#C6FF00",
+          "accent2": "#050505",
+          "ink": "#050505",
+          "ghostA": "#C6FF00",
+          "ghostB": "#2B3DFF"
+        },
+        {
+          "bg": "#0A0A0A",
+          "fg": "#FFFFFF",
+          "sub": "#9A9A9A",
+          "accent": "#C6FF00",
+          "accent2": "#FF2BD6",
+          "ink": "#FF2BD6",
+          "ghostA": "#C6FF00",
+          "ghostB": "#FF2BD6"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "reggae",
+          "dot",
+          "dela"
+        ],
+        "serif": [
+          "mincho_black"
+        ],
+        "body": [
+          "sansui"
+        ],
+        "mono": [
+          "dot",
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "sumi",
+      "name": "墨と朱",
+      "desc": "和紙の生成り・墨の筆文字・朱の落款",
+      "extra": true,
+      "wa": true,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#EFE5CF",
+          "fg": "#16130F",
+          "sub": "#5E574C",
+          "accent": "#B83A22",
+          "accent2": "#16130F",
+          "ink": "#16130F",
+          "ghostA": "#9A9284",
+          "ghostB": "#CC4A2E"
+        },
+        {
+          "bg": "#121110",
+          "fg": "#EFE8D8",
+          "sub": "#9A9286",
+          "accent": "#D9402A",
+          "accent2": "#EFE8D8",
+          "ink": "#EFE8D8",
+          "ghostA": "#5C5750",
+          "ghostB": "#D9402A"
+        },
+        {
+          "bg": "#B3301D",
+          "fg": "#FFF6E8",
+          "sub": "#FFD2C0",
+          "accent": "#16130F",
+          "accent2": "#FFF6E8",
+          "ink": "#FFF6E8",
+          "ghostA": "#16130F",
+          "ghostB": "#E8A070"
+        },
+        {
+          "bg": "#BAB4A7",
+          "fg": "#16130F",
+          "sub": "#3E3A33",
+          "accent": "#A82A18",
+          "accent2": "#16130F",
+          "ink": "#16130F",
+          "ghostA": "#6E685E",
+          "ghostB": "#B8321E"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "brush",
+          "mincho_black"
+        ],
+        "serif": [
+          "brush",
+          "shippori"
+        ],
+        "body": [
+          "klee"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    },
+    {
+      "id": "gold",
+      "name": "金夜",
+      "desc": "漆黒と金箔・象牙の明朝・きらめく光",
+      "extra": true,
+      "wa": false,
+      "horror": false,
+      "schemes": [
+        {
+          "bg": "#0A0907",
+          "fg": "#F3E7C4",
+          "sub": "#B39A62",
+          "accent": "#D4AF37",
+          "accent2": "#F3E7C4",
+          "ink": "#D4AF37",
+          "ghostA": "#D4AF37",
+          "ghostB": "#7A5230"
+        },
+        {
+          "bg": "#C9A24A",
+          "fg": "#0A0907",
+          "sub": "#3A2C12",
+          "accent": "#0A0907",
+          "accent2": "#FFF4D6",
+          "ink": "#0A0907",
+          "ghostA": "#8A5A1A",
+          "ghostB": "#3A2C12"
+        },
+        {
+          "bg": "#0B1024",
+          "fg": "#F3E7C4",
+          "sub": "#A89A78",
+          "accent": "#D4AF37",
+          "accent2": "#F3E7C4",
+          "ink": "#D4AF37",
+          "ghostA": "#D4AF37",
+          "ghostB": "#3A5AA8"
+        },
+        {
+          "bg": "#2B0A14",
+          "fg": "#F6EBD0",
+          "sub": "#C9A987",
+          "accent": "#D4AF37",
+          "accent2": "#F6EBD0",
+          "ink": "#D4AF37",
+          "ghostA": "#D4AF37",
+          "ghostB": "#9A2A4E"
+        }
+      ],
+      "fonts": {
+        "display": [
+          "shippori",
+          "mincho_light"
+        ],
+        "serif": [
+          "shippori",
+          "mincho_light"
+        ],
+        "body": [
+          "mincho_light"
+        ],
+        "mono": [
+          "mono"
+        ]
+      }
+    }
+  ],
+  "moods": [
+    {
+      "id": "glitch",
+      "name": "グリッチ",
+      "fx": {
+        "motion": [
+          0.6,
+          0.9
+        ],
+        "glitch": [
+          0.75,
+          1
+        ],
+        "chroma": [
+          0.75,
+          1
+        ],
+        "decor": [
+          0.3,
+          0.6
+        ],
+        "density": [
+          0.6,
+          0.9
+        ],
+        "texture": [
+          0.5,
+          0.9
+        ],
+        "bgSwitch": [
+          0.3,
+          0.6
+        ]
+      },
+      "layouts": [
+        "center",
+        "condensed",
+        "huge",
+        "tile",
+        "marquee",
+        "vcols",
+        "scatter",
+        "stack"
+      ],
+      "enters": [
+        "slice",
+        "scramble",
+        "assemble",
+        "flicker",
+        "zoom",
+        "stretch"
+      ],
+      "exits": [
+        "glitch",
+        "slice",
+        "explode",
+        "fall"
+      ],
+      "styles": [
+        "noir",
+        "crimson",
+        "mint",
+        "mono",
+        "hud"
+      ],
+      "set": null
+    },
+    {
+      "id": "calm",
+      "name": "しっとり",
+      "fx": {
+        "motion": [
+          0.3,
+          0.55
+        ],
+        "glitch": [
+          0.05,
+          0.25
+        ],
+        "chroma": [
+          0.2,
+          0.5
+        ],
+        "decor": [
+          0.2,
+          0.5
+        ],
+        "density": [
+          0.25,
+          0.45
+        ],
+        "texture": [
+          0.5,
+          0.85
+        ],
+        "bgSwitch": [
+          0.1,
+          0.3
+        ]
+      },
+      "layouts": [
+        "center",
+        "vcols",
+        "gloss",
+        "stack",
+        "circle",
+        "type",
+        "mixed"
+      ],
+      "enters": [
+        "blur",
+        "type",
+        "wipe",
+        "assemble"
+      ],
+      "exits": [
+        "blur",
+        "drift",
+        "wipe",
+        "shrink"
+      ],
+      "styles": [
+        "specimen",
+        "paper",
+        "hud",
+        "noir"
+      ],
+      "set": null
+    },
+    {
+      "id": "pop",
+      "name": "ポップ",
+      "fx": {
+        "motion": [
+          0.7,
+          1
+        ],
+        "glitch": [
+          0.1,
+          0.35
+        ],
+        "chroma": [
+          0.3,
+          0.6
+        ],
+        "decor": [
+          0.6,
+          1
+        ],
+        "density": [
+          0.5,
+          0.8
+        ],
+        "texture": [
+          0.2,
+          0.5
+        ],
+        "bgSwitch": [
+          0.4,
+          0.8
+        ]
+      },
+      "layouts": [
+        "mixed",
+        "scatter",
+        "wave",
+        "labels",
+        "pill",
+        "ring",
+        "huge",
+        "diag",
+        "center"
+      ],
+      "enters": [
+        "pop",
+        "drop",
+        "spin",
+        "stretch",
+        "zoom"
+      ],
+      "exits": [
+        "scatter",
+        "shrink",
+        "stretch",
+        "blur"
+      ],
+      "styles": [
+        "magenta",
+        "caution",
+        "transit",
+        "blueprint",
+        "rouge"
+      ],
+      "set": null
+    },
+    {
+      "id": "graphic",
+      "name": "グラフィック",
+      "fx": {
+        "motion": [
+          0.5,
+          0.8
+        ],
+        "glitch": [
+          0.2,
+          0.5
+        ],
+        "chroma": [
+          0.4,
+          0.7
+        ],
+        "decor": [
+          0.7,
+          1
+        ],
+        "density": [
+          0.5,
+          0.8
+        ],
+        "texture": [
+          0.4,
+          0.7
+        ],
+        "bgSwitch": [
+          0.3,
+          0.7
+        ]
+      },
+      "layouts": [
+        "diag",
+        "labels",
+        "marquee",
+        "tile",
+        "condensed",
+        "huge",
+        "circle",
+        "pill"
+      ],
+      "enters": [
+        "wipe",
+        "slice",
+        "stretch",
+        "zoom"
+      ],
+      "exits": [
+        "wipe",
+        "slice",
+        "stretch"
+      ],
+      "styles": [
+        "blueprint",
+        "caution",
+        "rouge",
+        "mint",
+        "transit"
+      ],
+      "set": null
+    },
+    {
+      "id": "editorial",
+      "name": "エディトリアル",
+      "fx": {
+        "motion": [
+          0.4,
+          0.65
+        ],
+        "glitch": [
+          0.1,
+          0.3
+        ],
+        "chroma": [
+          0.2,
+          0.45
+        ],
+        "decor": [
+          0.4,
+          0.7
+        ],
+        "density": [
+          0.35,
+          0.6
+        ],
+        "texture": [
+          0.6,
+          0.9
+        ],
+        "bgSwitch": [
+          0.2,
+          0.4
+        ]
+      },
+      "layouts": [
+        "gloss",
+        "vcols",
+        "mixed",
+        "stack",
+        "type",
+        "center",
+        "circle"
+      ],
+      "enters": [
+        "type",
+        "blur",
+        "wipe",
+        "assemble"
+      ],
+      "exits": [
+        "blur",
+        "drift",
+        "wipe"
+      ],
+      "styles": [
+        "specimen",
+        "paper",
+        "noir",
+        "mono",
+        "hud"
+      ],
+      "set": null
+    },
+    {
+      "id": "emotional",
+      "name": "エモーショナル",
+      "fx": {
+        "motion": [
+          0.55,
+          0.85
+        ],
+        "glitch": [
+          0.3,
+          0.6
+        ],
+        "chroma": [
+          0.5,
+          0.85
+        ],
+        "decor": [
+          0.3,
+          0.6
+        ],
+        "density": [
+          0.4,
+          0.7
+        ],
+        "texture": [
+          0.6,
+          1
+        ],
+        "bgSwitch": [
+          0.2,
+          0.5
+        ]
+      },
+      "layouts": [
+        "huge",
+        "center",
+        "vcols",
+        "stack",
+        "condensed",
+        "mixed",
+        "circle"
+      ],
+      "enters": [
+        "assemble",
+        "blur",
+        "zoom",
+        "wipe",
+        "slice"
+      ],
+      "exits": [
+        "drift",
+        "explode",
+        "fall",
+        "blur"
+      ],
+      "styles": [
+        "noir",
+        "paper",
+        "hud",
+        "mono",
+        "crimson"
+      ],
+      "set": null
+    },
+    {
+      "id": "horror",
+      "name": "ホラー",
+      "fx": {
+        "motion": [
+          0.35,
+          0.65
+        ],
+        "glitch": [
+          0.3,
+          0.7
+        ],
+        "chroma": [
+          0.2,
+          0.5
+        ],
+        "decor": [
+          0.3,
+          0.6
+        ],
+        "density": [
+          0.3,
+          0.55
+        ],
+        "texture": [
+          0.7,
+          1
+        ],
+        "bgSwitch": [
+          0.1,
+          0.3
+        ]
+      },
+      "layouts": [
+        "center",
+        "vcols",
+        "stack",
+        "huge",
+        "type"
+      ],
+      "enters": [
+        "flicker",
+        "blur",
+        "type",
+        "scramble"
+      ],
+      "exits": [
+        "blur",
+        "glitch",
+        "fall",
+        "drift"
+      ],
+      "styles": [
+        "noir",
+        "mono",
+        "crimson"
+      ],
+      "set": "horror"
+    },
+    {
+      "id": "chaos",
+      "name": "全部入り",
+      "fx": {
+        "motion": [
+          0.5,
+          1
+        ],
+        "glitch": [
+          0.3,
+          1
+        ],
+        "chroma": [
+          0.4,
+          1
+        ],
+        "decor": [
+          0.4,
+          1
+        ],
+        "density": [
+          0.45,
+          0.9
+        ],
+        "texture": [
+          0.3,
+          1
+        ],
+        "bgSwitch": [
+          0.3,
+          0.9
+        ]
+      },
+      "layouts": [],
+      "enters": [],
+      "exits": [],
+      "styles": [],
+      "set": null
+    }
+  ],
+  "aspects": [
+    "16:9",
+    "9:16",
+    "1:1",
+    "4:3",
+    "3:4",
+    "4:5",
+    "21:9"
+  ],
+  "resolutions": [
+    720,
+    1080,
+    1440,
+    2160
+  ],
+  "fpsList": [
+    24,
+    30,
+    60
+  ],
+  "fonts": [
+    {
+      "id": "gothic_black",
+      "label": "Noto Sans JP Black",
+      "kind": "gothic",
+      "weight": 900
+    },
+    {
+      "id": "gothic_bold",
+      "label": "Noto Sans JP Bold",
+      "kind": "gothic",
+      "weight": 700
+    },
+    {
+      "id": "gothic_med",
+      "label": "Noto Sans JP Medium",
+      "kind": "gothic",
+      "weight": 500
+    },
+    {
+      "id": "gothic_light",
+      "label": "Noto Sans JP Light",
+      "kind": "gothic",
+      "weight": 300
+    },
+    {
+      "id": "dela",
+      "label": "Dela Gothic One",
+      "kind": "display",
+      "weight": 400
+    },
+    {
+      "id": "zenkaku",
+      "label": "Zen Kaku Gothic New Black",
+      "kind": "gothic",
+      "weight": 900
+    },
+    {
+      "id": "mincho_black",
+      "label": "Zen Old Mincho Black",
+      "kind": "mincho",
+      "weight": 900
+    },
+    {
+      "id": "mincho_bold",
+      "label": "Noto Serif JP Bold",
+      "kind": "mincho",
+      "weight": 700
+    },
+    {
+      "id": "mincho",
+      "label": "Noto Serif JP Medium",
+      "kind": "mincho",
+      "weight": 500
+    },
+    {
+      "id": "mincho_light",
+      "label": "Noto Serif JP Light",
+      "kind": "mincho",
+      "weight": 300
+    },
+    {
+      "id": "tokumin",
+      "label": "Kaisei Tokumin",
+      "kind": "mincho",
+      "weight": 800
+    },
+    {
+      "id": "round",
+      "label": "M PLUS Rounded 1c",
+      "kind": "round",
+      "weight": 800
+    },
+    {
+      "id": "pop",
+      "label": "Mochiy Pop One",
+      "kind": "display",
+      "weight": 400
+    },
+    {
+      "id": "dot",
+      "label": "DotGothic16",
+      "kind": "pixel",
+      "weight": 400
+    },
+    {
+      "id": "brush",
+      "label": "Yuji Syuku",
+      "kind": "brush",
+      "weight": 400
+    },
+    {
+      "id": "mono",
+      "label": "IBM Plex Mono",
+      "kind": "mono",
+      "weight": 500
+    },
+    {
+      "id": "reggae",
+      "label": "Reggae One",
+      "kind": "display",
+      "weight": 400
+    },
+    {
+      "id": "rampart",
+      "label": "Rampart One",
+      "kind": "display",
+      "weight": 400
+    },
+    {
+      "id": "potta",
+      "label": "Potta One",
+      "kind": "brush",
+      "weight": 400
+    },
+    {
+      "id": "kiwi",
+      "label": "Kiwi Maru",
+      "kind": "round",
+      "weight": 500
+    },
+    {
+      "id": "klee",
+      "label": "Klee One",
+      "kind": "hand",
+      "weight": 600
+    },
+    {
+      "id": "shippori",
+      "label": "Shippori Mincho B1",
+      "kind": "mincho",
+      "weight": 800
+    },
+    {
+      "id": "sansui",
+      "label": "IBM Plex Sans JP",
+      "kind": "gothic",
+      "weight": 500
+    }
+  ],
+  "groups": {
+    "layout": [
+      "center",
+      "mixed",
+      "vcols",
+      "marquee",
+      "tile",
+      "scatter",
+      "ring",
+      "wave",
+      "huge",
+      "labels",
+      "condensed",
+      "gloss",
+      "type",
+      "diag",
+      "circle",
+      "stack",
+      "pill",
+      "hrFlashlight",
+      "hrDoorGap",
+      "hrWallScrawl",
+      "hrCctv",
+      "hrOuija",
+      "hrMissing",
+      "hrWrongOne",
+      "hrRisingDark",
+      "hrRedacted",
+      "hrStaticTv",
+      "hrSpiritPhoto",
+      "hrWrongShadow",
+      "knSlamStack",
+      "knQuarterTurn",
+      "knSwapCenter",
+      "knZoomDive",
+      "knFlowSnap",
+      "knSeesaw",
+      "knTypeSlam",
+      "knRhythmCuts",
+      "knPathRide",
+      "knGearWords",
+      "knCollide",
+      "knTumble",
+      "knReflow",
+      "knPadGrid",
+      "lowerThird",
+      "corners",
+      "staircase",
+      "zigzag",
+      "arcTop",
+      "spiral",
+      "gridCells",
+      "dropCap",
+      "justified",
+      "frameBox",
+      "bubble",
+      "subtitleBar",
+      "ticker",
+      "splitScreen",
+      "mirror",
+      "sideways",
+      "edgeFrame",
+      "perspective",
+      "hanko",
+      "genkou",
+      "panels",
+      "filmstrip",
+      "quote",
+      "ruler",
+      "searchBar",
+      "chat",
+      "notification",
+      "ticket",
+      "rain",
+      "hanging",
+      "orbit",
+      "tunnel",
+      "wordCloud",
+      "bounceLine",
+      "elastic",
+      "crossBands",
+      "stickerBomb",
+      "neon",
+      "keycaps",
+      "bubbles",
+      "slotMachine",
+      "flipBoard",
+      "credits",
+      "zoomRepeat",
+      "splitHalves",
+      "columnsBig",
+      "circleWords",
+      "dotMatrix",
+      "depthStack",
+      "typeSpecimen",
+      "kanjiFocus",
+      "halfVertical",
+      "curtain",
+      "equalizer",
+      "tape",
+      "magazine",
+      "headlineDeck",
+      "contents",
+      "footnote",
+      "proofread",
+      "numbered",
+      "poster",
+      "swissGrid",
+      "dictionary",
+      "ema",
+      "ransom",
+      "newspaper",
+      "vinyl",
+      "cassette",
+      "bookSpine",
+      "polaroid",
+      "stampSheet",
+      "postcard",
+      "letterPaper",
+      "calendar",
+      "chochin",
+      "routeMap",
+      "stationSign",
+      "noren",
+      "tanzaku",
+      "omikuji",
+      "kakejiku",
+      "shoji",
+      "clapper",
+      "warningLabel",
+      "priceTag",
+      "nameTag",
+      "stickyNotes",
+      "karuta",
+      "cube",
+      "cylinder",
+      "flipCards",
+      "accordion",
+      "flag",
+      "ribbon",
+      "pendulum",
+      "pile",
+      "blocks",
+      "balloons",
+      "magnets",
+      "tiles",
+      "bulbs",
+      "ledScroll",
+      "billboard",
+      "crowdBubbles",
+      "crossword",
+      "wordSearch",
+      "puzzle",
+      "shadowPlay",
+      "kaleido",
+      "dominoes",
+      "burst",
+      "fisheye",
+      "wall",
+      "origami",
+      "zipper",
+      "sliceStack",
+      "glitchGrid",
+      "mosaicTiles",
+      "maskReveal",
+      "contour",
+      "halftoneBig",
+      "stencil",
+      "tyKeySplit",
+      "tyCropGiant",
+      "tyCross",
+      "tyBandHide",
+      "tyRuby",
+      "tyBaseline",
+      "tyScaleSteps",
+      "tyJustify",
+      "tyIndexTable",
+      "tySplitType",
+      "tyErode",
+      "tyVRuler",
+      "tyFullTrack",
+      "tyStatCount",
+      "tyMargin",
+      "tyRotBlock",
+      "tySquare",
+      "tyLineFocus"
+    ],
+    "enter": [
+      "cut",
+      "assemble",
+      "slice",
+      "type",
+      "pop",
+      "drop",
+      "stretch",
+      "wipe",
+      "blur",
+      "spin",
+      "flicker",
+      "scramble",
+      "zoom",
+      "riseMask",
+      "dropMask",
+      "slideL",
+      "slideR",
+      "slideWhole",
+      "flipX",
+      "flipY",
+      "domino",
+      "fold",
+      "unroll",
+      "strokeDraw",
+      "outlineFill",
+      "splitJoin",
+      "vSlice",
+      "shutter",
+      "iris",
+      "diagWipe",
+      "blinds",
+      "checker",
+      "randomOrder",
+      "bounceBig",
+      "squashDrop",
+      "rubber",
+      "glitchIn",
+      "echoIn",
+      "whip",
+      "skewIn",
+      "trackIn",
+      "trackOut",
+      "blurStagger",
+      "fadeStagger",
+      "waveIn",
+      "spiralIn",
+      "zoomOut",
+      "resolve",
+      "magnet",
+      "inkBleed",
+      "neonOn",
+      "cursorSweep",
+      "stamp",
+      "springIn",
+      "pendulum",
+      "rollIn",
+      "slingshot",
+      "rockSettle",
+      "bounceBall",
+      "snapRail",
+      "fanOpen",
+      "cylinder",
+      "shuffle",
+      "stopMotion",
+      "ripple",
+      "zipper",
+      "zoomAlt",
+      "tiltUp",
+      "stickerPeel",
+      "crumple",
+      "noteUnfold",
+      "tornJoin",
+      "splitFlap",
+      "overexpose",
+      "glint",
+      "loupe",
+      "filmFeed",
+      "backlight",
+      "lightLeak",
+      "heatHaze",
+      "crtOn",
+      "interlace",
+      "loadingBar",
+      "dither",
+      "odometer",
+      "matrixRain",
+      "hatchFill",
+      "brushReveal",
+      "inkDrop",
+      "quarters",
+      "invertBox",
+      "printRegister",
+      "echoCount",
+      "liquidFill",
+      "windBlown",
+      "strokeOrder",
+      "clockWipe",
+      "shadowFirst",
+      "bubbles",
+      "tokoroten",
+      "hrBlinkCreep",
+      "hrJumpScare",
+      "hrUneasy",
+      "hrVhold",
+      "hrMirrorSnap",
+      "hrManifest",
+      "hrClawReveal",
+      "knWordSlam",
+      "knTypeToSlam",
+      "knReplaceIn",
+      "knHingeDrop",
+      "knLoopIn",
+      "knPushIn",
+      "knInertia",
+      "knWordSpin",
+      "knDiveIn",
+      "knStretchOut",
+      "tyKeyFirst",
+      "tyLineWipe",
+      "tyZoomOne",
+      "tyUnderLift",
+      "tyDotGrow",
+      "tyBracketOpen",
+      "tyRetype",
+      "tyRubyDrop"
+    ],
+    "hold": [
+      "still",
+      "jitter",
+      "drift",
+      "breathe",
+      "wave",
+      "glitchtick",
+      "float",
+      "sway",
+      "pulse",
+      "shimmer",
+      "colorRun",
+      "rotateSlow",
+      "trackBreathe",
+      "skewWobble",
+      "beatHop",
+      "hWave",
+      "heartbeat",
+      "orbitSmall",
+      "jelly",
+      "scanBand",
+      "noiseDrift",
+      "tilt",
+      "zoomSlow",
+      "stretchPulse",
+      "glitchJump",
+      "echoTrail",
+      "glowFlicker",
+      "windGust",
+      "dangle",
+      "eqBounce",
+      "flashBox",
+      "glintSweep",
+      "flipSwap",
+      "shadowSway",
+      "magnetJiggle",
+      "typeRattle",
+      "focusRack",
+      "pluckString",
+      "hrTwitch",
+      "hrStare",
+      "hrLagOne",
+      "hrFlickerLight",
+      "knWordPulse",
+      "knCounterRock",
+      "knWordRide",
+      "knTickShift",
+      "knBeatLean",
+      "knGapBreath",
+      "tyKeyPulse",
+      "tyReadCursor",
+      "tyOutlineBlink",
+      "tyTrackStep"
+    ],
+    "exit": [
+      "cut",
+      "explode",
+      "fall",
+      "drift",
+      "slice",
+      "wipe",
+      "shrink",
+      "blur",
+      "stretch",
+      "scatter",
+      "glitch",
+      "sinkMask",
+      "riseOut",
+      "slideOutL",
+      "slideOutR",
+      "flipOutX",
+      "flipOutY",
+      "foldOut",
+      "squash",
+      "trackOutWide",
+      "collapse",
+      "zoomThrough",
+      "zoomFar",
+      "spinOut",
+      "twist",
+      "waveOut",
+      "blurOutStagger",
+      "undraw",
+      "outlineOut",
+      "irisClose",
+      "diagWipeOut",
+      "blindsClose",
+      "checkerOut",
+      "splitApart",
+      "vSliceDrop",
+      "melt",
+      "dissolve",
+      "backspace",
+      "scrambleOut",
+      "glitchDissolve",
+      "echoOut",
+      "whipOut",
+      "gravity",
+      "popOut",
+      "burn",
+      "sweepCover",
+      "shatterLite",
+      "peelOff",
+      "crumpleOut",
+      "tearOut",
+      "scorchOut",
+      "overexposeOut",
+      "scanOut",
+      "stripesOut",
+      "halftoneOut",
+      "eraserOut",
+      "vacuumOut",
+      "sandOut",
+      "shredOut",
+      "dominoOut",
+      "hingeOut",
+      "rocketOff",
+      "bounceOff",
+      "balloonOff",
+      "deflateOut",
+      "hazeOut",
+      "glassBreak",
+      "zipOut",
+      "clapShut",
+      "lampOff",
+      "slotOut",
+      "clockOut",
+      "matrixOut",
+      "tornadoOut",
+      "rollUpOut",
+      "snakeOut",
+      "flutterOut",
+      "rollOff",
+      "fanClose",
+      "rgbSplitOut",
+      "shockOut",
+      "floodOut",
+      "slashOut",
+      "mosaicOut",
+      "scribbleOut",
+      "candleOut",
+      "hrPulledDown",
+      "hrLookBack",
+      "hrTurnAway",
+      "hrShiver",
+      "hrSwallow",
+      "hrFlickerDie",
+      "hrDrain",
+      "knWordKick",
+      "knPushOut",
+      "knDiveGlyph",
+      "knLaunch",
+      "knWordBlink",
+      "knCloseGap",
+      "knJumpCutOut",
+      "knStackAway",
+      "tyStrike",
+      "tyToDot",
+      "tyLineFeed",
+      "tyBracketClose",
+      "tyToIndex",
+      "tyKeyLast",
+      "tyUnderSink",
+      "tyFoldVert"
+    ],
+    "decor": [
+      "brackets",
+      "rings",
+      "dots",
+      "arrows",
+      "slash",
+      "sparks",
+      "leaders",
+      "waveform",
+      "barcode",
+      "grid",
+      "stripes",
+      "blobs",
+      "bars",
+      "shapes",
+      "counter",
+      "crosshair",
+      "cropMarks",
+      "reticle",
+      "radar",
+      "progressRing",
+      "timecodeBar",
+      "rulerEdge",
+      "dimension",
+      "indexNum",
+      "dateStamp",
+      "qrBlock",
+      "glitchRects",
+      "concentricSquares",
+      "triangleSpin",
+      "lineBurst",
+      "plusGrid",
+      "guides",
+      "waveLine",
+      "spiralLine",
+      "halftonePatch",
+      "checkerStrip",
+      "beatRing",
+      "orbitDots",
+      "constellation",
+      "confetti",
+      "petals",
+      "rainStreaks",
+      "snow",
+      "lightLeak",
+      "bokeh",
+      "speedCorner",
+      "risingParticles",
+      "twinkle",
+      "brushStroke",
+      "tapePieces",
+      "scribbleCircle",
+      "scribbleUnder",
+      "crossOut",
+      "highlightMark",
+      "heartsStars",
+      "watermarkKanji",
+      "verticalStrip",
+      "romajiLine",
+      "bracketsJP",
+      "seal",
+      "kamon",
+      "seigaiha",
+      "asanoha",
+      "hanabi",
+      "chochin",
+      "shimenawa",
+      "sensu",
+      "tsukiKumo",
+      "momiji",
+      "namiGashira",
+      "kasumi",
+      "hexGrid",
+      "spectrumRing",
+      "dataColumns",
+      "spinner",
+      "headingTape",
+      "glyphLock",
+      "atomOrbit",
+      "sonarArcs",
+      "circuit",
+      "swatches",
+      "ruledLines",
+      "registration",
+      "punchHoles",
+      "staple",
+      "paperClip",
+      "indexTabs",
+      "vines",
+      "cloudPuffs",
+      "starField",
+      "moonPhases",
+      "sunRays",
+      "rainRipples",
+      "bubbles",
+      "smoke",
+      "dandelion",
+      "fireflies",
+      "memphis",
+      "zigzagRibbon",
+      "polkaPatch",
+      "stripeCircle",
+      "decoCorners",
+      "halfCircles",
+      "loopArrows",
+      "starburst",
+      "tally",
+      "cursorClick",
+      "windowChrome",
+      "progressBar",
+      "toggleSwitch",
+      "notifBell",
+      "likeCounter",
+      "mediaControls",
+      "volumeBars",
+      "musicNotes",
+      "hrScratches",
+      "hrSigil",
+      "hrWatchEye",
+      "hrStaticPatch",
+      "hrDustBeam",
+      "hrDrips",
+      "hrCracks",
+      "knSpeedTrail",
+      "knWordTicks",
+      "tyColophon",
+      "tyRunningHead",
+      "tyGlyphBody",
+      "tyTextRule",
+      "tyTypeScale",
+      "tyBigPunct"
+    ],
+    "treat": [
+      "none",
+      "hrInkBleed",
+      "hrEroded",
+      "hrRedact",
+      "hrDoubleExp",
+      "knWordScale",
+      "knWordPlate",
+      "outline",
+      "outlineFill",
+      "doubleOutline",
+      "extrude",
+      "longShadow",
+      "hardShadow",
+      "softShadow",
+      "glow",
+      "marker",
+      "underline",
+      "strike",
+      "boxed",
+      "gradientV",
+      "splitColor",
+      "halftone",
+      "stripes",
+      "hatch",
+      "dotted",
+      "alternate",
+      "italic",
+      "wide",
+      "tall",
+      "echoOutline",
+      "emphasisDots",
+      "neonOutline",
+      "chrome",
+      "rainbow",
+      "glitchSplit",
+      "shadowStack",
+      "stencilGap",
+      "waterline",
+      "karaoke",
+      "sizeWave",
+      "rotateAlt",
+      "baselineShift",
+      "fauxBold",
+      "circled",
+      "bracketsQuote",
+      "reflection",
+      "inline",
+      "sticker",
+      "gradientSweep",
+      "kerningWide",
+      "monoGrid",
+      "outlineOffset",
+      "toneShadow",
+      "fadeChars",
+      "cutShift",
+      "focusPull",
+      "spotChar",
+      "ransom",
+      "tyHollowKey",
+      "tyHeadRules",
+      "tyHeadBig",
+      "tyIndexSup"
+    ],
+    "bg": [
+      "none",
+      "auroraRibbons",
+      "meshBlobs",
+      "duotoneSweep",
+      "horizonGlow",
+      "seigaiha",
+      "asanoha",
+      "houndstooth",
+      "herringbone",
+      "argyle",
+      "tartan",
+      "chevron",
+      "isoCubes",
+      "hexGrid",
+      "triTess",
+      "moire",
+      "squareTunnel",
+      "spiralArms",
+      "topoLines",
+      "ridgePlot",
+      "starfield",
+      "nightMoon",
+      "skyline",
+      "sunsetSun",
+      "oceanWaves",
+      "rainWindow",
+      "snowLayers",
+      "fireworks",
+      "cloudLayers",
+      "mountains",
+      "filmStrip",
+      "vhsBand",
+      "tornPaper",
+      "godRays",
+      "vignettePulse",
+      "kaleidoscope",
+      "marble",
+      "paperCut",
+      "hrFailingLamp",
+      "hrCorridor",
+      "hrMold",
+      "hrDeadTrees",
+      "sunburst",
+      "concentric",
+      "halftoneFade",
+      "bigStripes",
+      "splitV",
+      "splitH",
+      "splitDiag",
+      "gradientSweep",
+      "spotlight",
+      "tvBars",
+      "checker",
+      "bigChar",
+      "speedLines",
+      "scanBars",
+      "dotGrid",
+      "retroGrid",
+      "bokehBg",
+      "particlesBg",
+      "ripples",
+      "polka",
+      "eqBars",
+      "borderFrame",
+      "letterbox",
+      "noiseField"
+    ],
+    "cam": [
+      "push",
+      "orbitDrift",
+      "barrelRoll",
+      "pendulumSway",
+      "focusIn",
+      "rackFocus",
+      "earthquake",
+      "floatNoise",
+      "vertigo",
+      "tiltDown",
+      "spiralIn",
+      "snapPan",
+      "jelly",
+      "hrNervous",
+      "hrDutchSnap",
+      "knReadPan",
+      "knTiltKick",
+      "knCardFlip",
+      "knShearKick",
+      "knJumpCut",
+      "knRushIn",
+      "pullOut",
+      "panL",
+      "panR",
+      "tiltUp",
+      "dutch",
+      "handheld",
+      "beatPunch",
+      "whipIn",
+      "crashZoom",
+      "bounce",
+      "roll",
+      "driftDiag",
+      "shakeHard",
+      "dollyIn",
+      "stepZoom"
+    ],
+    "fx": [
+      "chroma",
+      "shake",
+      "slice",
+      "block",
+      "invert",
+      "flash",
+      "zoom",
+      "mosaic",
+      "radialChroma",
+      "bloomFlash",
+      "bulge",
+      "pixelSort",
+      "interlace",
+      "macroBlock",
+      "halftone",
+      "duotone",
+      "ditherBit",
+      "rotateSnap",
+      "echoFrames",
+      "kaleido",
+      "bandInvert",
+      "lightRays",
+      "anamorphic",
+      "heartbeat",
+      "tvStatic",
+      "dustScratches",
+      "filmAdvance",
+      "perspectiveTilt",
+      "ripple",
+      "focusLines",
+      "speedLines",
+      "starGlint",
+      "colorBars",
+      "zoomStutter",
+      "negativeRing",
+      "edgeDetect",
+      "shatter",
+      "defocus",
+      "snapshot",
+      "squash",
+      "scanBar",
+      "loopScroll",
+      "hrSubliminal",
+      "hrSignalLoss",
+      "hrPassingShadow",
+      "panelWipe",
+      "irisTrans",
+      "doors",
+      "blindsTrans",
+      "rgbSplit",
+      "smear",
+      "vhsRoll",
+      "trackingNoise",
+      "mirrorFlash",
+      "strobe",
+      "posterize",
+      "hueShift",
+      "tileShift",
+      "filmBurn",
+      "whipBlur",
+      "blackFrame",
+      "whiteFrame",
+      "gridRepeat",
+      "waveWarp",
+      "pixelDrift",
+      "zoomPunch",
+      "lightSweep",
+      "crtOff",
+      "splitSlide"
+    ],
+    "trans": [
+      "hrStaticCut",
+      "hrBlink",
+      "knCornerSwing",
+      "knStutterCut",
+      "knStripSlam",
+      "wipe",
+      "diagonalWipe",
+      "clockWipe",
+      "irisOpen",
+      "pushSlide",
+      "cover",
+      "uncover",
+      "zoomThrough",
+      "doorsOpen",
+      "blinds",
+      "checker",
+      "blockDissolve",
+      "whipPan",
+      "spinOut",
+      "inkBlob",
+      "shatterTiles",
+      "sliceShift",
+      "cubeTurn",
+      "flashCross",
+      "pixelate",
+      "tyRuleWipe",
+      "tyGridCells"
+    ]
+  },
+  "defaultProject": {
+    "version": 1,
+    "timingOrder": 2,
+    "themeId": null,
+    "title": "",
+    "artist": "",
+    "lyrics": "夜明けの色を/覚えてる\nほどけた声が遠くで鳴った\nねえ、まだ間に合うかな\n*透明*なままじゃ終われない!",
+    "style": "noir",
+    "mood": null,
+    "extra": false,
+    "wa": true,
+    "horror": false,
+    "typo": true,
+    "kinetic": true,
+    "lang": "auto",
+    "keyBg": "off",
+    "unify": false,
+    "typeset": false,
+    "centerDir": "tb",
+    "centerFree": false,
+    "seed": 20260922,
+    "aspect": "16:9",
+    "res": 1080,
+    "fps": 24,
+    "fx": {
+      "motion": 0.7,
+      "glitch": 0.55,
+      "chroma": 0.7,
+      "decor": 0.5,
+      "density": 0.55,
+      "texture": 0.6,
+      "flash": true,
+      "onTwos": true,
+      "koma": 12,
+      "hud": "auto",
+      "bgSwitch": 0.35,
+      "hideNo": false,
+      "hideTime": false
+    },
+    "enabled": {
+      "layout": {
+        "center": true,
+        "mixed": true,
+        "vcols": true,
+        "marquee": true,
+        "tile": true,
+        "scatter": true,
+        "ring": true,
+        "wave": true,
+        "huge": true,
+        "labels": true,
+        "condensed": true,
+        "gloss": true,
+        "type": true,
+        "diag": true,
+        "circle": true,
+        "stack": true,
+        "pill": true,
+        "hrFlashlight": true,
+        "hrDoorGap": true,
+        "hrWallScrawl": true,
+        "hrCctv": true,
+        "hrOuija": true,
+        "hrMissing": true,
+        "hrWrongOne": true,
+        "hrRisingDark": true,
+        "hrRedacted": true,
+        "hrStaticTv": true,
+        "hrSpiritPhoto": true,
+        "hrWrongShadow": true,
+        "knSlamStack": true,
+        "knQuarterTurn": true,
+        "knSwapCenter": true,
+        "knZoomDive": true,
+        "knFlowSnap": true,
+        "knSeesaw": true,
+        "knTypeSlam": true,
+        "knRhythmCuts": true,
+        "knPathRide": true,
+        "knGearWords": true,
+        "knCollide": true,
+        "knTumble": true,
+        "knReflow": true,
+        "knPadGrid": true,
+        "lowerThird": true,
+        "corners": true,
+        "staircase": true,
+        "zigzag": true,
+        "arcTop": true,
+        "spiral": true,
+        "gridCells": true,
+        "dropCap": true,
+        "justified": true,
+        "frameBox": true,
+        "bubble": true,
+        "subtitleBar": true,
+        "ticker": true,
+        "splitScreen": true,
+        "mirror": true,
+        "sideways": true,
+        "edgeFrame": true,
+        "perspective": true,
+        "hanko": true,
+        "genkou": true,
+        "panels": true,
+        "filmstrip": true,
+        "quote": true,
+        "ruler": true,
+        "searchBar": true,
+        "chat": true,
+        "notification": true,
+        "ticket": true,
+        "rain": true,
+        "hanging": true,
+        "orbit": true,
+        "tunnel": true,
+        "wordCloud": true,
+        "bounceLine": true,
+        "elastic": true,
+        "crossBands": true,
+        "stickerBomb": true,
+        "neon": true,
+        "keycaps": true,
+        "bubbles": true,
+        "slotMachine": true,
+        "flipBoard": true,
+        "credits": true,
+        "zoomRepeat": true,
+        "splitHalves": true,
+        "columnsBig": true,
+        "circleWords": true,
+        "dotMatrix": true,
+        "depthStack": true,
+        "typeSpecimen": true,
+        "kanjiFocus": true,
+        "halfVertical": true,
+        "curtain": true,
+        "equalizer": true,
+        "tape": true,
+        "magazine": true,
+        "headlineDeck": true,
+        "contents": true,
+        "footnote": true,
+        "proofread": true,
+        "numbered": true,
+        "poster": true,
+        "swissGrid": true,
+        "dictionary": true,
+        "ema": true,
+        "ransom": true,
+        "newspaper": true,
+        "vinyl": true,
+        "cassette": true,
+        "bookSpine": true,
+        "polaroid": true,
+        "stampSheet": true,
+        "postcard": true,
+        "letterPaper": true,
+        "calendar": true,
+        "chochin": true,
+        "routeMap": true,
+        "stationSign": true,
+        "noren": true,
+        "tanzaku": true,
+        "omikuji": true,
+        "kakejiku": true,
+        "shoji": true,
+        "clapper": true,
+        "warningLabel": true,
+        "priceTag": true,
+        "nameTag": true,
+        "stickyNotes": true,
+        "karuta": true,
+        "cube": true,
+        "cylinder": true,
+        "flipCards": true,
+        "accordion": true,
+        "flag": true,
+        "ribbon": true,
+        "pendulum": true,
+        "pile": true,
+        "blocks": true,
+        "balloons": true,
+        "magnets": true,
+        "tiles": true,
+        "bulbs": true,
+        "ledScroll": true,
+        "billboard": true,
+        "crowdBubbles": true,
+        "crossword": true,
+        "wordSearch": true,
+        "puzzle": true,
+        "shadowPlay": true,
+        "kaleido": true,
+        "dominoes": true,
+        "burst": true,
+        "fisheye": true,
+        "wall": true,
+        "origami": true,
+        "zipper": true,
+        "sliceStack": true,
+        "glitchGrid": true,
+        "mosaicTiles": true,
+        "maskReveal": true,
+        "contour": true,
+        "halftoneBig": true,
+        "stencil": true,
+        "tyKeySplit": true,
+        "tyCropGiant": true,
+        "tyCross": true,
+        "tyBandHide": true,
+        "tyRuby": true,
+        "tyBaseline": true,
+        "tyScaleSteps": true,
+        "tyJustify": true,
+        "tyIndexTable": true,
+        "tySplitType": true,
+        "tyErode": true,
+        "tyVRuler": true,
+        "tyFullTrack": true,
+        "tyStatCount": true,
+        "tyMargin": true,
+        "tyRotBlock": true,
+        "tySquare": true,
+        "tyLineFocus": true
+      },
+      "enter": {
+        "cut": true,
+        "assemble": true,
+        "slice": true,
+        "type": true,
+        "pop": true,
+        "drop": true,
+        "stretch": true,
+        "wipe": true,
+        "blur": true,
+        "spin": true,
+        "flicker": true,
+        "scramble": true,
+        "zoom": true,
+        "riseMask": true,
+        "dropMask": true,
+        "slideL": true,
+        "slideR": true,
+        "slideWhole": true,
+        "flipX": true,
+        "flipY": true,
+        "domino": true,
+        "fold": true,
+        "unroll": true,
+        "strokeDraw": true,
+        "outlineFill": true,
+        "splitJoin": true,
+        "vSlice": true,
+        "shutter": true,
+        "iris": true,
+        "diagWipe": true,
+        "blinds": true,
+        "checker": true,
+        "randomOrder": true,
+        "bounceBig": true,
+        "squashDrop": true,
+        "rubber": true,
+        "glitchIn": true,
+        "echoIn": true,
+        "whip": true,
+        "skewIn": true,
+        "trackIn": true,
+        "trackOut": true,
+        "blurStagger": true,
+        "fadeStagger": true,
+        "waveIn": true,
+        "spiralIn": true,
+        "zoomOut": true,
+        "resolve": true,
+        "magnet": true,
+        "inkBleed": true,
+        "neonOn": true,
+        "cursorSweep": true,
+        "stamp": true,
+        "springIn": true,
+        "pendulum": true,
+        "rollIn": true,
+        "slingshot": true,
+        "rockSettle": true,
+        "bounceBall": true,
+        "snapRail": true,
+        "fanOpen": true,
+        "cylinder": true,
+        "shuffle": true,
+        "stopMotion": true,
+        "ripple": true,
+        "zipper": true,
+        "zoomAlt": true,
+        "tiltUp": true,
+        "stickerPeel": true,
+        "crumple": true,
+        "noteUnfold": true,
+        "tornJoin": true,
+        "splitFlap": true,
+        "overexpose": true,
+        "glint": true,
+        "loupe": true,
+        "filmFeed": true,
+        "backlight": true,
+        "lightLeak": true,
+        "heatHaze": true,
+        "crtOn": true,
+        "interlace": true,
+        "loadingBar": true,
+        "dither": true,
+        "odometer": true,
+        "matrixRain": true,
+        "hatchFill": true,
+        "brushReveal": true,
+        "inkDrop": true,
+        "quarters": true,
+        "invertBox": true,
+        "printRegister": true,
+        "echoCount": true,
+        "liquidFill": true,
+        "windBlown": true,
+        "strokeOrder": true,
+        "clockWipe": true,
+        "shadowFirst": true,
+        "bubbles": true,
+        "tokoroten": true,
+        "hrBlinkCreep": true,
+        "hrJumpScare": true,
+        "hrUneasy": true,
+        "hrVhold": true,
+        "hrMirrorSnap": true,
+        "hrManifest": true,
+        "hrClawReveal": true,
+        "knWordSlam": true,
+        "knTypeToSlam": true,
+        "knReplaceIn": true,
+        "knHingeDrop": true,
+        "knLoopIn": true,
+        "knPushIn": true,
+        "knInertia": true,
+        "knWordSpin": true,
+        "knDiveIn": true,
+        "knStretchOut": true,
+        "tyKeyFirst": true,
+        "tyLineWipe": true,
+        "tyZoomOne": true,
+        "tyUnderLift": true,
+        "tyDotGrow": true,
+        "tyBracketOpen": true,
+        "tyRetype": true,
+        "tyRubyDrop": true
+      },
+      "hold": {
+        "still": true,
+        "jitter": true,
+        "drift": true,
+        "breathe": true,
+        "wave": true,
+        "glitchtick": true,
+        "float": true,
+        "sway": true,
+        "pulse": true,
+        "shimmer": true,
+        "colorRun": true,
+        "rotateSlow": true,
+        "trackBreathe": true,
+        "skewWobble": true,
+        "beatHop": true,
+        "hWave": true,
+        "heartbeat": true,
+        "orbitSmall": true,
+        "jelly": true,
+        "scanBand": true,
+        "noiseDrift": true,
+        "tilt": true,
+        "zoomSlow": true,
+        "stretchPulse": true,
+        "glitchJump": true,
+        "echoTrail": true,
+        "glowFlicker": true,
+        "windGust": true,
+        "dangle": true,
+        "eqBounce": true,
+        "flashBox": true,
+        "glintSweep": true,
+        "flipSwap": true,
+        "shadowSway": true,
+        "magnetJiggle": true,
+        "typeRattle": true,
+        "focusRack": true,
+        "pluckString": true,
+        "hrTwitch": true,
+        "hrStare": true,
+        "hrLagOne": true,
+        "hrFlickerLight": true,
+        "knWordPulse": true,
+        "knCounterRock": true,
+        "knWordRide": true,
+        "knTickShift": true,
+        "knBeatLean": true,
+        "knGapBreath": true,
+        "tyKeyPulse": true,
+        "tyReadCursor": true,
+        "tyOutlineBlink": true,
+        "tyTrackStep": true
+      },
+      "exit": {
+        "cut": true,
+        "explode": true,
+        "fall": true,
+        "drift": true,
+        "slice": true,
+        "wipe": true,
+        "shrink": true,
+        "blur": true,
+        "stretch": true,
+        "scatter": true,
+        "glitch": true,
+        "sinkMask": true,
+        "riseOut": true,
+        "slideOutL": true,
+        "slideOutR": true,
+        "flipOutX": true,
+        "flipOutY": true,
+        "foldOut": true,
+        "squash": true,
+        "trackOutWide": true,
+        "collapse": true,
+        "zoomThrough": true,
+        "zoomFar": true,
+        "spinOut": true,
+        "twist": true,
+        "waveOut": true,
+        "blurOutStagger": true,
+        "undraw": true,
+        "outlineOut": true,
+        "irisClose": true,
+        "diagWipeOut": true,
+        "blindsClose": true,
+        "checkerOut": true,
+        "splitApart": true,
+        "vSliceDrop": true,
+        "melt": true,
+        "dissolve": true,
+        "backspace": true,
+        "scrambleOut": true,
+        "glitchDissolve": true,
+        "echoOut": true,
+        "whipOut": true,
+        "gravity": true,
+        "popOut": true,
+        "burn": true,
+        "sweepCover": true,
+        "shatterLite": true,
+        "peelOff": true,
+        "crumpleOut": true,
+        "tearOut": true,
+        "scorchOut": true,
+        "overexposeOut": true,
+        "scanOut": true,
+        "stripesOut": true,
+        "halftoneOut": true,
+        "eraserOut": true,
+        "vacuumOut": true,
+        "sandOut": true,
+        "shredOut": true,
+        "dominoOut": true,
+        "hingeOut": true,
+        "rocketOff": true,
+        "bounceOff": true,
+        "balloonOff": true,
+        "deflateOut": true,
+        "hazeOut": true,
+        "glassBreak": true,
+        "zipOut": true,
+        "clapShut": true,
+        "lampOff": true,
+        "slotOut": true,
+        "clockOut": true,
+        "matrixOut": true,
+        "tornadoOut": true,
+        "rollUpOut": true,
+        "snakeOut": true,
+        "flutterOut": true,
+        "rollOff": true,
+        "fanClose": true,
+        "rgbSplitOut": true,
+        "shockOut": true,
+        "floodOut": true,
+        "slashOut": true,
+        "mosaicOut": true,
+        "scribbleOut": true,
+        "candleOut": true,
+        "hrPulledDown": true,
+        "hrLookBack": true,
+        "hrTurnAway": true,
+        "hrShiver": true,
+        "hrSwallow": true,
+        "hrFlickerDie": true,
+        "hrDrain": true,
+        "knWordKick": true,
+        "knPushOut": true,
+        "knDiveGlyph": true,
+        "knLaunch": true,
+        "knWordBlink": true,
+        "knCloseGap": true,
+        "knJumpCutOut": true,
+        "knStackAway": true,
+        "tyStrike": true,
+        "tyToDot": true,
+        "tyLineFeed": true,
+        "tyBracketClose": true,
+        "tyToIndex": true,
+        "tyKeyLast": true,
+        "tyUnderSink": true,
+        "tyFoldVert": true
+      },
+      "decor": {
+        "brackets": true,
+        "rings": true,
+        "dots": true,
+        "arrows": true,
+        "slash": true,
+        "sparks": true,
+        "leaders": true,
+        "waveform": true,
+        "barcode": true,
+        "grid": true,
+        "stripes": true,
+        "blobs": true,
+        "bars": true,
+        "shapes": true,
+        "counter": true,
+        "crosshair": true,
+        "cropMarks": true,
+        "reticle": true,
+        "radar": true,
+        "progressRing": true,
+        "timecodeBar": true,
+        "rulerEdge": true,
+        "dimension": true,
+        "indexNum": true,
+        "dateStamp": true,
+        "qrBlock": true,
+        "glitchRects": true,
+        "concentricSquares": true,
+        "triangleSpin": true,
+        "lineBurst": true,
+        "plusGrid": true,
+        "guides": true,
+        "waveLine": true,
+        "spiralLine": true,
+        "halftonePatch": true,
+        "checkerStrip": true,
+        "beatRing": true,
+        "orbitDots": true,
+        "constellation": true,
+        "confetti": true,
+        "petals": true,
+        "rainStreaks": true,
+        "snow": true,
+        "lightLeak": true,
+        "bokeh": true,
+        "speedCorner": true,
+        "risingParticles": true,
+        "twinkle": true,
+        "brushStroke": true,
+        "tapePieces": true,
+        "scribbleCircle": true,
+        "scribbleUnder": true,
+        "crossOut": true,
+        "highlightMark": true,
+        "heartsStars": true,
+        "watermarkKanji": true,
+        "verticalStrip": true,
+        "romajiLine": true,
+        "bracketsJP": true,
+        "seal": true,
+        "kamon": true,
+        "seigaiha": true,
+        "asanoha": true,
+        "hanabi": true,
+        "chochin": true,
+        "shimenawa": true,
+        "sensu": true,
+        "tsukiKumo": true,
+        "momiji": true,
+        "namiGashira": true,
+        "kasumi": true,
+        "hexGrid": true,
+        "spectrumRing": true,
+        "dataColumns": true,
+        "spinner": true,
+        "headingTape": true,
+        "glyphLock": true,
+        "atomOrbit": true,
+        "sonarArcs": true,
+        "circuit": true,
+        "swatches": true,
+        "ruledLines": true,
+        "registration": true,
+        "punchHoles": true,
+        "staple": true,
+        "paperClip": true,
+        "indexTabs": true,
+        "vines": true,
+        "cloudPuffs": true,
+        "starField": true,
+        "moonPhases": true,
+        "sunRays": true,
+        "rainRipples": true,
+        "bubbles": true,
+        "smoke": true,
+        "dandelion": true,
+        "fireflies": true,
+        "memphis": true,
+        "zigzagRibbon": true,
+        "polkaPatch": true,
+        "stripeCircle": true,
+        "decoCorners": true,
+        "halfCircles": true,
+        "loopArrows": true,
+        "starburst": true,
+        "tally": true,
+        "cursorClick": true,
+        "windowChrome": true,
+        "progressBar": true,
+        "toggleSwitch": true,
+        "notifBell": true,
+        "likeCounter": true,
+        "mediaControls": true,
+        "volumeBars": true,
+        "musicNotes": true,
+        "hrScratches": true,
+        "hrSigil": true,
+        "hrWatchEye": true,
+        "hrStaticPatch": true,
+        "hrDustBeam": true,
+        "hrDrips": true,
+        "hrCracks": true,
+        "knSpeedTrail": true,
+        "knWordTicks": true,
+        "tyColophon": true,
+        "tyRunningHead": true,
+        "tyGlyphBody": true,
+        "tyTextRule": true,
+        "tyTypeScale": true,
+        "tyBigPunct": true
+      },
+      "treat": {
+        "none": true,
+        "hrInkBleed": true,
+        "hrEroded": true,
+        "hrRedact": true,
+        "hrDoubleExp": true,
+        "knWordScale": true,
+        "knWordPlate": true,
+        "outline": true,
+        "outlineFill": true,
+        "doubleOutline": true,
+        "extrude": true,
+        "longShadow": true,
+        "hardShadow": true,
+        "softShadow": true,
+        "glow": true,
+        "marker": true,
+        "underline": true,
+        "strike": true,
+        "boxed": true,
+        "gradientV": true,
+        "splitColor": true,
+        "halftone": true,
+        "stripes": true,
+        "hatch": true,
+        "dotted": true,
+        "alternate": true,
+        "italic": true,
+        "wide": true,
+        "tall": true,
+        "echoOutline": true,
+        "emphasisDots": true,
+        "neonOutline": true,
+        "chrome": true,
+        "rainbow": true,
+        "glitchSplit": true,
+        "shadowStack": true,
+        "stencilGap": true,
+        "waterline": true,
+        "karaoke": true,
+        "sizeWave": true,
+        "rotateAlt": true,
+        "baselineShift": true,
+        "fauxBold": true,
+        "circled": true,
+        "bracketsQuote": true,
+        "reflection": true,
+        "inline": true,
+        "sticker": true,
+        "gradientSweep": true,
+        "kerningWide": true,
+        "monoGrid": true,
+        "outlineOffset": true,
+        "toneShadow": true,
+        "fadeChars": true,
+        "cutShift": true,
+        "focusPull": true,
+        "spotChar": true,
+        "ransom": true,
+        "tyHollowKey": true,
+        "tyHeadRules": true,
+        "tyHeadBig": true,
+        "tyIndexSup": true
+      },
+      "bg": {
+        "none": true,
+        "auroraRibbons": true,
+        "meshBlobs": true,
+        "duotoneSweep": true,
+        "horizonGlow": true,
+        "seigaiha": true,
+        "asanoha": true,
+        "houndstooth": true,
+        "herringbone": true,
+        "argyle": true,
+        "tartan": true,
+        "chevron": true,
+        "isoCubes": true,
+        "hexGrid": true,
+        "triTess": true,
+        "moire": true,
+        "squareTunnel": true,
+        "spiralArms": true,
+        "topoLines": true,
+        "ridgePlot": true,
+        "starfield": true,
+        "nightMoon": true,
+        "skyline": true,
+        "sunsetSun": true,
+        "oceanWaves": true,
+        "rainWindow": true,
+        "snowLayers": true,
+        "fireworks": true,
+        "cloudLayers": true,
+        "mountains": true,
+        "filmStrip": true,
+        "vhsBand": true,
+        "tornPaper": true,
+        "godRays": true,
+        "vignettePulse": true,
+        "kaleidoscope": true,
+        "marble": true,
+        "paperCut": true,
+        "hrFailingLamp": true,
+        "hrCorridor": true,
+        "hrMold": true,
+        "hrDeadTrees": true,
+        "sunburst": true,
+        "concentric": true,
+        "halftoneFade": true,
+        "bigStripes": true,
+        "splitV": true,
+        "splitH": true,
+        "splitDiag": true,
+        "gradientSweep": true,
+        "spotlight": true,
+        "tvBars": true,
+        "checker": true,
+        "bigChar": true,
+        "speedLines": true,
+        "scanBars": true,
+        "dotGrid": true,
+        "retroGrid": true,
+        "bokehBg": true,
+        "particlesBg": true,
+        "ripples": true,
+        "polka": true,
+        "eqBars": true,
+        "borderFrame": true,
+        "letterbox": true,
+        "noiseField": true
+      },
+      "cam": {
+        "push": true,
+        "orbitDrift": true,
+        "barrelRoll": true,
+        "pendulumSway": true,
+        "focusIn": true,
+        "rackFocus": true,
+        "earthquake": true,
+        "floatNoise": true,
+        "vertigo": true,
+        "tiltDown": true,
+        "spiralIn": true,
+        "snapPan": true,
+        "jelly": true,
+        "hrNervous": true,
+        "hrDutchSnap": true,
+        "knReadPan": true,
+        "knTiltKick": true,
+        "knCardFlip": true,
+        "knShearKick": true,
+        "knJumpCut": true,
+        "knRushIn": true,
+        "pullOut": true,
+        "panL": true,
+        "panR": true,
+        "tiltUp": true,
+        "dutch": true,
+        "handheld": true,
+        "beatPunch": true,
+        "whipIn": true,
+        "crashZoom": true,
+        "bounce": true,
+        "roll": true,
+        "driftDiag": true,
+        "shakeHard": true,
+        "dollyIn": true,
+        "stepZoom": true
+      },
+      "fx": {
+        "chroma": true,
+        "shake": true,
+        "slice": true,
+        "block": true,
+        "invert": true,
+        "flash": true,
+        "zoom": true,
+        "mosaic": true,
+        "radialChroma": true,
+        "bloomFlash": true,
+        "bulge": true,
+        "pixelSort": true,
+        "interlace": true,
+        "macroBlock": true,
+        "halftone": true,
+        "duotone": true,
+        "ditherBit": true,
+        "rotateSnap": true,
+        "echoFrames": true,
+        "kaleido": true,
+        "bandInvert": true,
+        "lightRays": true,
+        "anamorphic": true,
+        "heartbeat": true,
+        "tvStatic": true,
+        "dustScratches": true,
+        "filmAdvance": true,
+        "perspectiveTilt": true,
+        "ripple": true,
+        "focusLines": true,
+        "speedLines": true,
+        "starGlint": true,
+        "colorBars": true,
+        "zoomStutter": true,
+        "negativeRing": true,
+        "edgeDetect": true,
+        "shatter": true,
+        "defocus": true,
+        "snapshot": true,
+        "squash": true,
+        "scanBar": true,
+        "loopScroll": true,
+        "hrSubliminal": true,
+        "hrSignalLoss": true,
+        "hrPassingShadow": true,
+        "panelWipe": true,
+        "irisTrans": true,
+        "doors": true,
+        "blindsTrans": true,
+        "rgbSplit": true,
+        "smear": true,
+        "vhsRoll": true,
+        "trackingNoise": true,
+        "mirrorFlash": true,
+        "strobe": true,
+        "posterize": true,
+        "hueShift": true,
+        "tileShift": true,
+        "filmBurn": true,
+        "whipBlur": true,
+        "blackFrame": true,
+        "whiteFrame": true,
+        "gridRepeat": true,
+        "waveWarp": true,
+        "pixelDrift": true,
+        "zoomPunch": true,
+        "lightSweep": true,
+        "crtOff": true,
+        "splitSlide": true
+      },
+      "trans": {
+        "hrStaticCut": true,
+        "hrBlink": true,
+        "knCornerSwing": true,
+        "knStutterCut": true,
+        "knStripSlam": true,
+        "wipe": true,
+        "diagonalWipe": true,
+        "clockWipe": true,
+        "irisOpen": true,
+        "pushSlide": true,
+        "cover": true,
+        "uncover": true,
+        "zoomThrough": true,
+        "doorsOpen": true,
+        "blinds": true,
+        "checker": true,
+        "blockDissolve": true,
+        "whipPan": true,
+        "spinOut": true,
+        "inkBlob": true,
+        "shatterTiles": true,
+        "sliceShift": true,
+        "cubeTurn": true,
+        "flashCross": true,
+        "pixelate": true,
+        "tyRuleWipe": true,
+        "tyGridCells": true
+      }
+    },
+    "timing": {
+      "bpm": 0,
+      "offset": 0.4,
+      "snap": true,
+      "tail": 0.9,
+      "lineTimes": {},
+      "lineScale": 1
+    },
+    "overrides": {},
+    "locks": {
+      "tech": {},
+      "params": {}
+    },
+    "colors": {
+      "enabled": false
+    },
+    "fonts": {}
+  }
+}
