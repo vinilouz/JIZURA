@@ -38591,8 +38591,10 @@ const accept = async (file) => {
     }
     // Only the first clip plays first, and it plays the moment the preview starts, so
     // it is the one that has to be decoded before playback. The rest are warmed by
-    // warmAhead a whole clip before the reel reaches them.
-    if (!assets().some(isVideo)) await J.video.ready(id, 0);
+    // warmAhead a whole clip before the reel reaches them. WARM_US, not the full window:
+    // the import only needs the head of the clip, and a 2.5 s window of 720p VideoFrames
+    // is what made this spin for 8 s and throw on the owner's own clips.
+    if (!assets().some(isVideo)) await J.video.ready(id, 0, J.video.WARM_US);
     return { asset: { id, name: file.name, type: file.type, w: info.w, h: info.h, dur: info.dur } };
   }
   let bmp;
@@ -39281,6 +39283,7 @@ const demux = buf => {
   }
 
   /* composition offsets (B-frames) */
+  let reorder = 0;
   const ctts = pick(st, 'ctts');
   if (ctts) {
     const signed = dv.getUint8(ctts.start) === 1;
@@ -39288,6 +39291,7 @@ const demux = buf => {
     for (let e = 0, p = ctts.start + 8, i = 0; e < nCtts; e++, p += 8) {
       const cnt = dv.getUint32(p);
       const off = signed ? dv.getInt32(p + 4) : dv.getUint32(p + 4);
+      if (off > reorder) reorder = off;
       for (let k = 0; k < cnt; k++, i++) ts[i] += off * 1e6 / timescale;
     }
   }
@@ -39338,6 +39342,7 @@ const demux = buf => {
   return {
     codec, description, codedWidth: width, codedHeight: height, rotation: rot,
     timescale, count, keys, key, ts, sorted, dur, size, off, buffer: buf,
+    reorder: reorder * 1e6 / timescale,
     duration: mvTimescale ? mvDuration / mvTimescale : 0,
   };
 };
@@ -39529,8 +39534,12 @@ const pump = (v, depth) => {
   v.pumping = true;
   const gen = v.gen;
   const run = async () => {
-    // ts is in decode order, so the feed limit comes from the presentation index
-    const upto = feedTo(v.t, v.playhead + (depth || WINDOW_US));
+    // ts is in decode order, so the feed limit comes from the presentation index.
+    // Plus the clip's own reorder delay: a B-frame is held back by the decoder until the
+    // frame it references arrives, so stopping exactly at the end of the window leaves the
+    // last few frames stuck inside the decoder forever. Measured on the owner's 24 fps
+    // clips: fed 12 chunks, the decoder emitted 9, and ready() waited on frame 10.
+    const upto = feedTo(v.t, v.playhead + (depth || WINDOW_US) + v.t.reorder);
     while (!v.fail && v.gen === gen && v.next <= upto) {
       if (v.decoder.decodeQueueSize >= FEED_MAX) { await tick(); continue; }
       v.decoder.decode(chunk(v, v.next));

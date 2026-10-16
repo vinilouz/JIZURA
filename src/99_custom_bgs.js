@@ -134,8 +134,10 @@ const accept = async (file) => {
     }
     // Only the first clip plays first, and it plays the moment the preview starts, so
     // it is the one that has to be decoded before playback. The rest are warmed by
-    // warmAhead a whole clip before the reel reaches them.
-    if (!assets().some(isVideo)) await J.video.ready(id, 0);
+    // warmAhead a whole clip before the reel reaches them. WARM_US, not the full window:
+    // the import only needs the head of the clip, and a 2.5 s window of 720p VideoFrames
+    // is what made this spin for 8 s and throw on the owner's own clips.
+    if (!assets().some(isVideo)) await J.video.ready(id, 0, J.video.WARM_US);
     return { asset: { id, name: file.name, type: file.type, w: info.w, h: info.h, dur: info.dur } };
   }
   let bmp;

@@ -155,6 +155,7 @@ const demux = buf => {
   }
 
   /* composition offsets (B-frames) */
+  let reorder = 0;
   const ctts = pick(st, 'ctts');
   if (ctts) {
     const signed = dv.getUint8(ctts.start) === 1;
@@ -162,6 +163,7 @@ const demux = buf => {
     for (let e = 0, p = ctts.start + 8, i = 0; e < nCtts; e++, p += 8) {
       const cnt = dv.getUint32(p);
       const off = signed ? dv.getInt32(p + 4) : dv.getUint32(p + 4);
+      if (off > reorder) reorder = off;
       for (let k = 0; k < cnt; k++, i++) ts[i] += off * 1e6 / timescale;
     }
   }
@@ -212,6 +214,7 @@ const demux = buf => {
   return {
     codec, description, codedWidth: width, codedHeight: height, rotation: rot,
     timescale, count, keys, key, ts, sorted, dur, size, off, buffer: buf,
+    reorder: reorder * 1e6 / timescale,
     duration: mvTimescale ? mvDuration / mvTimescale : 0,
   };
 };
@@ -403,8 +406,12 @@ const pump = (v, depth) => {
   v.pumping = true;
   const gen = v.gen;
   const run = async () => {
-    // ts is in decode order, so the feed limit comes from the presentation index
-    const upto = feedTo(v.t, v.playhead + (depth || WINDOW_US));
+    // ts is in decode order, so the feed limit comes from the presentation index.
+    // Plus the clip's own reorder delay: a B-frame is held back by the decoder until the
+    // frame it references arrives, so stopping exactly at the end of the window leaves the
+    // last few frames stuck inside the decoder forever. Measured on the owner's 24 fps
+    // clips: fed 12 chunks, the decoder emitted 9, and ready() waited on frame 10.
+    const upto = feedTo(v.t, v.playhead + (depth || WINDOW_US) + v.t.reorder);
     while (!v.fail && v.gen === gen && v.next <= upto) {
       if (v.decoder.decodeQueueSize >= FEED_MAX) { await tick(); continue; }
       v.decoder.decode(chunk(v, v.next));
