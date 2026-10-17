@@ -204,6 +204,20 @@ J.bgForLine = (line) => {
   return list[((l % list.length) + list.length) % list.length];
 };
 
+/* The asset whose window covers tSec, walking all assets (images included) in order.
+   Returns null when any asset lacks `dur`, keeping the old reel/line rotation. */
+J.bgSceneAt = (tSec) => {
+  const list = assets();
+  if (!list.length) return null;
+  let acc = 0;
+  for (const a of list) {
+    if (!(a.dur > 0)) return null;
+    if (tSec >= acc && tSec < acc + a.dur) return { asset: a, local: Math.max(0, tSec - acc) };
+    acc += a.dur;
+  }
+  return { asset: list[list.length - 1], local: 0 };
+};
+
 /* Videos are one continuous reel that loops when the song is longer than the clips */
 J.bgVideoAt = (tSec) => {
   const reels = assets().filter(isVideo);
@@ -223,7 +237,8 @@ J.bgVideoAt = (tSec) => {
 /* Pre-synchronize video decoding before drawing a frame (used by export & snapshots) */
 J.ensureBgReady = async (tSec) => {
   if (typeof J.bgVideoAt !== 'function' || !J.video || typeof J.video.ready !== 'function') return;
-  const reel = J.bgVideoAt(tSec);
+  const sceneAt = J.bgSceneAt(tSec);
+  const reel = sceneAt && !isVideo(sceneAt.asset) ? null : (sceneAt || J.bgVideoAt(tSec));
   if (reel && reel.asset) {
     await J.video.ready(reel.asset.id, reel.local, 0);
   }
@@ -330,8 +345,9 @@ const drawMedia = env => {
   if (!list.length) return;                    // nothing loaded: the editor background stays as it is
   const cut = env.cut;
   if (!cut) throw new Error('99_custom_bgs: background media needs a cut to rotate over');
-  const reel = J.bgVideoAt(env.t);
-  const asset = reel ? reel.asset : J.bgForLine(cut.line);
+  const sceneAt = J.bgSceneAt(env.t);
+  const reel = sceneAt && !isVideo(sceneAt.asset) ? null : (sceneAt || J.bgVideoAt(env.t));
+  const asset = reel ? reel.asset : (sceneAt ? sceneAt.asset : J.bgForLine(cut.line));
   const vid = isVideo(asset);
   // the preview canvas is the one on screen; the export builds its own, detached
   const live = env.ctx.canvas.isConnected;

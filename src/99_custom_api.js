@@ -163,12 +163,13 @@ J.prepareJob = async ({ audioBuffer, lyrics, config = {}, backgrounds = [] }) =>
       const isVid = bg.type === 'video' || (bg.name && /\.(mp4|mov)$/i.test(bg.name));
       if (isVid) {
         const info = await J.video.open(id, bg.data);
-        const asset = { id, name: bg.name || 'clip.mp4', type: 'video/mp4', w: info.w, h: info.h, dur: info.dur };
+        // explicit dur wins: scene windows must not be derived from the decoded clip
+        const asset = { id, name: bg.name || 'clip.mp4', type: 'video/mp4', w: info.w, h: info.h, dur: bg.dur || info.dur };
         J.bgRegisterDirect(asset, null);
       } else {
         const blob = bg.data instanceof Blob ? bg.data : new Blob([bg.data]);
         const bmp = await createImageBitmap(blob);
-        const asset = { id, name: bg.name || 'image.png', type: 'image/png', w: bmp.width, h: bmp.height };
+        const asset = { id, name: bg.name || 'image.png', type: 'image/png', w: bmp.width, h: bmp.height, dur: bg.dur };
         J.bgRegisterDirect(asset, bmp);
       }
     }
