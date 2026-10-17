@@ -9,8 +9,11 @@ usage: python3 dev/import_probe.py [url]
 import asyncio, glob, json, os, sys
 from playwright.async_api import async_playwright
 
-CLIPS = '/var/home/vinilouz/Projetos/GHOSTLAB/channels/reveriofc/releases/T013/movie/clips'
-URL = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:5500/en/index.html'
+CLIPS = sys.argv[1] if len(sys.argv) > 1 else None
+URL = sys.argv[2] if len(sys.argv) > 2 else 'http://127.0.0.1:5500/en/index.html'
+if not CLIPS:
+    print('uso: python3 dev/import_probe.py <pasta-de-clips> [url]')
+    sys.exit(2)
 
 SETUP = r"""
 async () => {

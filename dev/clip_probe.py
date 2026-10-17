@@ -5,8 +5,10 @@ usage: python3 dev/clip_probe.py [caminho.mp4]
 import asyncio, json, os, sys
 from playwright.async_api import async_playwright
 
-CLIP = sys.argv[1] if len(sys.argv) > 1 else \
-    '/var/home/vinilouz/Projetos/GHOSTLAB/channels/reveriofc/releases/T013/movie/clips/s1.mp4'
+if len(sys.argv) < 2:
+    print('uso: python3 dev/clip_probe.py <caminho.mp4>')
+    sys.exit(2)
+CLIP = sys.argv[1]
 URL = 'http://127.0.0.1:5500/en/index.html'
 ROUTE = 'http://127.0.0.1:5500/probe-clip.mp4'
 

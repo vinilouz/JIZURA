@@ -1,7 +1,7 @@
 {
   "name": "@jizura/vendor",
   "version": "0.9.0",
-  "description": "Programmatic kinetic typography video generator vendor for GHOSTLAB and headless pipelines",
+  "description": "Programmatic kinetic typography video generator vendor for headless pipelines",
   "type": "module",
   "main": "./index.ts",
   "types": "./types.ts",
