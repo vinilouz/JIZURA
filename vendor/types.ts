@@ -99,6 +99,7 @@ export interface JizuraBackgroundInput {
   /** Path to local file, Buffer or ArrayBuffer */
   data: string | Uint8Array | ArrayBuffer;
   name?: string;
+  dur?: number;
 }
 
 export interface JizuraProgressStats {

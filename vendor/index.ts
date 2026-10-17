@@ -74,7 +74,7 @@ export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
   }
 
   // Read background assets into memory
-  const backgroundsPrepared: Array<{ type: 'video' | 'image'; name: string; base64: string }> = [];
+  const backgroundsPrepared: Array<{ type: 'video' | 'image'; name: string; base64: string; dur?: number }> = [];
   if (job.backgrounds && Array.isArray(job.backgrounds)) {
     for (const bg of job.backgrounds) {
       const bgBuf = await toBuffer(bg.data);
@@ -82,6 +82,7 @@ export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
         type: bg.type,
         name: bg.name || (bg.type === 'video' ? 'clip.mp4' : 'image.png'),
         base64: bgBuf.toString('base64'),
+        dur: bg.dur,
       });
     }
   }
@@ -186,10 +187,11 @@ export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
         };
 
         const audioBuf = audioB64 ? b64toAB(audioB64) : null;
-        const bgAssets = backgrounds.map((b: { type: 'video' | 'image'; name: string; base64: string }) => ({
+        const bgAssets = backgrounds.map((b: { type: 'video' | 'image'; name: string; base64: string; dur?: number }) => ({
           type: b.type,
           name: b.name,
           data: b64toAB(b.base64),
+          dur: b.dur,
         }));
 
         const out = await (window as any).J.renderJob({
@@ -308,6 +310,7 @@ export async function snapshot(
           type: bg.type,
           name: bg.name || (bg.type === 'video' ? 'clip.mp4' : 'image.png'),
           base64: bgBuf.toString('base64'),
+          dur: bg.dur,
         });
       }
     }
@@ -325,10 +328,11 @@ export async function snapshot(
           return u8.buffer;
         };
         const audioBuf = audioB64 ? b64toAB(audioB64) : null;
-        const bgAssets = backgrounds.map((b: { type: 'video' | 'image'; name: string; base64: string }) => ({
+        const bgAssets = backgrounds.map((b: { type: 'video' | 'image'; name: string; base64: string; dur?: number }) => ({
           type: b.type,
           name: b.name,
           data: b64toAB(b.base64),
+          dur: b.dur,
         }));
 
         const prep = await (window as any).J.prepareJob({
