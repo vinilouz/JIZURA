@@ -38236,9 +38236,9 @@ J.renderJob = async (job) => {
   });
 
   const blob = res.blob;
-  const arrayBuffer = await blob.arrayBuffer();
   return {
-    buffer: arrayBuffer,
+    blob,
+    get buffer() { return blob.arrayBuffer(); },
     size: res.size,
     duration: plan.duration,
     fps: plan.fps,

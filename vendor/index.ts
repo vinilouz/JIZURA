@@ -1,4 +1,6 @@
 import fs from 'node:fs';
+import http from 'node:http';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type {
@@ -92,7 +94,64 @@ export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
       '--allow-file-access-from-files',
       '--autoplay-policy=no-user-gesture-required',
       '--disable-web-security',
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-gpu-sandbox',
+      '--enable-gpu-rasterization',
+      '--ignore-gpu-blocklist',
+      '--enable-zero-copy',
+      '--disable-dev-shm-usage',
+      '--disable-background-timer-throttling',
+      '--disable-renderer-backgrounding',
+      '--js-flags=--max-old-space-size=4096',
     ],
+  });
+
+  let server: http.Server | null = null;
+  let localPort = 0;
+  let finishResolve: () => void;
+  let finishReject: (err: any) => void;
+  const finishPromise = new Promise<void>((resolve, reject) => {
+    finishResolve = resolve;
+    finishReject = reject;
+  });
+
+  const targetOutput = job.outputPath;
+  const tempOutFile = targetOutput || path.join(os.tmpdir(), `jizura-render-${Date.now()}-${Math.random().toString(36).slice(2)}.mp4`);
+  await fs.promises.mkdir(path.dirname(tempOutFile), { recursive: true });
+
+  server = http.createServer((req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Methods', 'POST');
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+    if (req.method === 'POST') {
+      const outStream = fs.createWriteStream(tempOutFile);
+      req.pipe(outStream);
+      outStream.on('finish', () => {
+        res.writeHead(200);
+        res.end('ok');
+        finishResolve();
+      });
+      outStream.on('error', (err) => {
+        res.writeHead(500);
+        res.end(String(err));
+        finishReject(err);
+      });
+    } else {
+      res.writeHead(404);
+      res.end();
+    }
+  });
+
+  await new Promise<void>((resolve) => {
+    server!.listen(0, '127.0.0.1', () => {
+      localPort = (server!.address() as any).port;
+      resolve();
+    });
   });
 
   try {
@@ -117,7 +176,7 @@ export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
     await page.waitForFunction('() => window.__jizuraReady === true');
 
     const result = await page.evaluate(
-      async ({ audioB64, lyrics, config, backgrounds, quality, range }) => {
+      async ({ audioB64, lyrics, config, backgrounds, quality, range, port }) => {
         const b64toAB = (b64: string) => {
           const bin = atob(b64);
           const len = bin.length;
@@ -145,16 +204,19 @@ export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
           },
         });
 
-        // Convert output ArrayBuffer back to Base64
-        let binary = '';
-        const bytes = new Uint8Array(out.buffer);
-        const chunkSz = 0x8000;
-        for (let i = 0; i < bytes.length; i += chunkSz) {
-          binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunkSz)));
+        // Stream rendered video directly to host over local HTTP loopback
+        const blob = out.blob || (out.buffer ? new Blob([out.buffer], { type: 'video/mp4' }) : null);
+        if (!blob) throw new Error('No video output generated');
+
+        const postRes = await fetch(`http://127.0.0.1:${port}/save`, {
+          method: 'POST',
+          body: blob,
+        });
+        if (!postRes.ok) {
+          throw new Error(`Failed to stream render to host: ${postRes.status} ${postRes.statusText}`);
         }
 
         return {
-          base64: btoa(binary),
           size: out.size,
           duration: out.duration,
           fps: out.fps,
@@ -171,28 +233,37 @@ export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
         backgrounds: backgroundsPrepared,
         quality: job.quality || 'high',
         range: job.range || null,
+        port: localPort,
       }
     );
 
-    const buffer = Buffer.from(result.base64, 'base64');
+    await finishPromise;
+    server.close();
 
-    if (job.outputPath) {
-      await fs.promises.mkdir(path.dirname(job.outputPath), { recursive: true });
-      await fs.promises.writeFile(job.outputPath, buffer);
+    const stats = await fs.promises.stat(tempOutFile);
+    let buffer: Buffer;
+    if (!targetOutput) {
+      buffer = await fs.promises.readFile(tempOutFile);
+      await fs.promises.unlink(tempOutFile).catch(() => {});
+    } else {
+      buffer = stats.size < 50 * 1024 * 1024 ? await fs.promises.readFile(tempOutFile) : Buffer.alloc(0);
     }
 
     return {
       buffer,
-      size: result.size,
+      size: stats.size || result.size,
       duration: result.duration,
       fps: result.fps,
       width: result.width,
       height: result.height,
       codec: result.codec,
       cuts: result.cuts,
-      outputPath: job.outputPath,
+      outputPath: targetOutput || tempOutFile,
     };
   } finally {
+    try {
+      if (server && (server as any).listening) server.close();
+    } catch {}
     await browser.close();
   }
 }
