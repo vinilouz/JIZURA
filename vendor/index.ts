@@ -158,9 +158,9 @@ export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
     const page = await browser.newPage();
 
     // Progress bridge
-    await page.exposeFunction('__jizuraOnProgress', (progress: number, msg: string) => {
+    await page.exposeFunction('__jizuraOnProgress', (progress: number, msg: string, stats?: any) => {
       if (job.onProgress) {
-        job.onProgress(progress, msg);
+        job.onProgress(progress, msg, stats);
       }
     });
 
@@ -199,8 +199,8 @@ export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
           backgrounds: bgAssets,
           quality: quality || 'high',
           range: range || null,
-          onProgress: (p: number, msg: string) => {
-            (window as any).__jizuraOnProgress(p, msg);
+          onProgress: (p: number, msg: string, stats: any) => {
+            (window as any).__jizuraOnProgress(p, msg, stats);
           },
         });
 

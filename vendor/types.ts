@@ -101,6 +101,14 @@ export interface JizuraBackgroundInput {
   name?: string;
 }
 
+export interface JizuraProgressStats {
+  current: number;
+  total: number;
+  percent: number;
+  fps: number;
+  eta: number;
+}
+
 export interface JizuraJobInput {
   /** Path to audio file or raw buffer (MP3, WAV, AAC, etc.) */
   audio?: string | Uint8Array | ArrayBuffer;
@@ -116,8 +124,8 @@ export interface JizuraJobInput {
   range?: { t0: number; t1: number } | null;
   /** Optional file path where to write the MP4 directly */
   outputPath?: string;
-  /** Progress callback */
-  onProgress?: (progress: number, message: string) => void;
+  /** Progress callback with optional stats object */
+  onProgress?: (progress: number, message: string, stats?: JizuraProgressStats) => void;
 }
 
 export interface JizuraCutInfo {

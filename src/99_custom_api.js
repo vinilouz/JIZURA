@@ -208,8 +208,8 @@ J.renderJob = async (job) => {
     audio,
     quality,
     range,
-    onProgress: (p, msg) => {
-      if (onProgress) onProgress(p, msg);
+    onProgress: (p, msg, stats) => {
+      if (onProgress) onProgress(p, msg, stats);
     },
   });
 
