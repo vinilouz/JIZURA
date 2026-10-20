@@ -5509,7 +5509,12 @@ async function encodeMP4({ plan, project, audio, onProgress, signal, range, file
       if (err) throw err;
       if (venc.state === 'closed') throw new Error('Encoder berhenti');
       const t = span.t0 + i / fps;
-      if (J.ensureBgReady) await J.ensureBgReady(t);
+      // The renderer draws the background at the quantised time (tq), so the warm-up must ask
+      // for that same one: with the raw t the decoder is left one koma ahead and every frame
+      // seeks backwards, which resets the decoder mid-stream and kills the export.
+      const sd = J.stepDur(plan.fx, fps);
+      const tq = Math.floor(t / sd + 1e-6) * sd;
+      if (J.ensureBgReady) await J.ensureBgReady(tq);
       R.frame(ctx, plan, t, { scale });
       const vf = new VideoFrame(canvas, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round(1e6 / fps) });
       try { venc.encode(vf, { keyFrame: i % (fps * 2) === 0 }); } finally { vf.close(); }
@@ -5618,7 +5623,9 @@ J.exportPNGZip = async ({ plan, project, transparent, layers, onProgress, signal
     const name = `jizura_${String(i).padStart(5, '0')}.png`;
     for (const layer of layers ? ['back', 'front'] : [null]) {
       const t = span.t0 + i / fps;
-      if (J.ensureBgReady) await J.ensureBgReady(t);
+      const sd = J.stepDur(plan.fx, fps);
+      const tq = Math.floor(t / sd + 1e-6) * sd;
+      if (J.ensureBgReady) await J.ensureBgReady(tq);
       R.frame(ctx, plan, t, { scale, transparent: transparent || !!layers, layer });
       const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
       zip.add((layer ? layer + '/' : '') + name, new Uint8Array(await blob.arrayBuffer()));
