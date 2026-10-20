@@ -67,6 +67,10 @@ export interface JizuraProjectConfig {
   artist?: string;
   style?: string;
   mood?: string | null;
+  /** おまかせのテーマ (J.THEMES key): lyricpv / kinetic / wa / horror / pop / ballad */
+  themeId?: string | null;
+  /** Show the whole line again at the end of that line (the recap cut). Default true. */
+  recap?: boolean;
   seed?: number;
   aspect?: '16:9' | '9:16' | '1:1' | '4:3' | '3:4' | '4:5' | '21:9';
   res?: number;

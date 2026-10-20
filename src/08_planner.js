@@ -24,6 +24,7 @@ J.defaultProject = () => ({
   lang: 'auto',                   // 歌詞の言語: 'auto' | 'ja' | 'zh-Hant' | 'zh-Hans' | 'ko' — picks the faces each font key is drawn with
   keyBg: 'off',                   // 合成用の背景: 'off' | 'green' (グリーンバック) | 'black' (ブラックバック)
   unify: false,                   // 統一感: part palettes, repeats shown the same way, キメ, モーフ, 太さ
+  recap: true,                    // 頷き: a whole line is shown again at the end of that line (see plan)
   typeset: false,                 // 文字整列: kana tracking, small particles / big first character, Latin sizing, 0.2 s lead, restraint
   centerDir: 'tb',                // 中央を空ける on tall frames: 'tb' = top / bottom, 'lr' = left / right
   centerFree: false,              // 中央を空ける: lay the cuts out in side bands (left / right or top / bottom) around a character
@@ -266,6 +267,12 @@ function cutTechOf(ov, k) {
 }
 
 J.plan = (project, audio) => {
+  // The theme decides the direction (mood / motion / repertoire). What the caller fixed
+  // (style, colours, fonts, seed) stays. Same seed -> same direction, so the preview and the
+  // export show the same thing. themeApplied: already themed (the UI's おまかせ) -> leave it.
+  if (project.themeId && J.applyTheme && project.themeApplied !== project.themeId) {
+    project = J.applyTheme(project, project.themeId);
+  }
   const st = J.resolveStyle(project);
   const fx = Object.assign({}, J.defaultProject().fx, project.fx || {});
   const parsed = J.parseLyrics(project.lyrics);
@@ -368,7 +375,7 @@ J.plan = (project, audio) => {
     const nG = Math.min(nC, chunks2.length);
     if (nG <= 1) groups = [ln.text];
     else groups = partition(chunks2, nG).map(g => J.joinWords(g));
-    const recap = !fixedN && nC > groups.length && groups.length >= 2;
+    const recap = !fixedN && project.recap !== false && nC > groups.length && groups.length >= 2;
     let units = groups.map(g => ({ text: g, w: [...g].length + 1.6 }));
     if (recap) units.push({ text: ln.text, w: (units.reduce((a, u) => a + u.w, 0) / units.length) * 1.25, recap: true });
     // a locked line keeps its own cuts too (the cut count would otherwise follow the 細かさ slider or おまかせ)

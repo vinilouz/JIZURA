@@ -52,7 +52,11 @@ J.THEMES = {
 };
 J.THEME_ORDER = Object.keys(J.THEMES);
 
-J.omakase = (project, rnd = Math.random, themeId = null) => {
+// opts.fixedLook: テーマは方向（ムード・動き・技の repertoire）だけを決める。
+// 外観（スタイル・色・書体・seed・上書き）は呼び出し側のまま — SDK/スクリプトから
+// 使うとき、テーマを当てても手元の貌を壊さないため。
+J.omakase = (project, rnd = Math.random, themeId = null, opts = {}) => {
+  const fixedLook = !!opts.fixedLook;
   const T = themeId && J.THEMES[themeId] ? J.THEMES[themeId] : null;
   const switches = {};
   if (T && T.set) switches[T.set] = true;
@@ -70,17 +74,22 @@ J.omakase = (project, rnd = Math.random, themeId = null) => {
   const moodSetOk = d => !(d && d.set) || !Object.values(J.MOODS).some(m => m.set === d.set) || M.set === d.set;
   // style: mostly one that suits the mood, sometimes anything; never the same twice in a row
   // (only styles the 追加分 / 和風 switches allow)
-  const okStyle = k => J.STYLES[k] && (!J.randomOk || J.randomOk(project, 'style', k)) && moodSetOk(J.STYLES[k]);
-  const moodStyles = [...new Set([...(M.styles || []), ...J.STYLE_ORDER.filter(k => (J.STYLES[k].moods || []).includes(mood))])].filter(okStyle);
-  let pool = (moodStyles.length && rnd() < 0.72 ? moodStyles : J.STYLE_ORDER.filter(okStyle)).filter(k => k !== project.style);
-  if (T) { const ts = J.STYLE_ORDER.filter(k => okStyle(k) && themePart(J.STYLES[k]) && k !== project.style); if (ts.length && rnd() < 0.8) pool = ts; }
-  if (!pool.length) pool = J.STYLE_ORDER.filter(k => k !== project.style && okStyle(k));
-  if (!pool.length) pool = J.STYLE_ORDER.filter(k => k !== project.style);
-  const style = pick(pool);
+  let style = project.style;
+  if (!fixedLook) {
+    const okStyle = k => J.STYLES[k] && (!J.randomOk || J.randomOk(project, 'style', k)) && moodSetOk(J.STYLES[k]);
+    const moodStyles = [...new Set([...(M.styles || []), ...J.STYLE_ORDER.filter(k => (J.STYLES[k].moods || []).includes(mood))])].filter(okStyle);
+    let pool = (moodStyles.length && rnd() < 0.72 ? moodStyles : J.STYLE_ORDER.filter(okStyle)).filter(k => k !== project.style);
+    if (T) { const ts = J.STYLE_ORDER.filter(k => okStyle(k) && themePart(J.STYLES[k]) && k !== project.style); if (ts.length && rnd() < 0.8) pool = ts; }
+    if (!pool.length) pool = J.STYLE_ORDER.filter(k => k !== project.style && okStyle(k));
+    if (!pool.length) pool = J.STYLE_ORDER.filter(k => k !== project.style);
+    style = pick(pool);
+  }
   const fx = Object.assign({}, project.fx);
   for (const k of Object.keys(M.fx)) fx[k] = range(M.fx[k]);
-  fx.koma = pick(T && T.koma ? T.koma : { horror: [12, 8, 0], glitch: [12, 12, 8], pop: [12, 12, 8, 0], calm: [0, 0, 12], editorial: [0, 12], emotional: [12, 0], graphic: [12, 12, 0] }[mood] || [12, 8, 0]);
-  fx.onTwos = fx.koma > 0; fx.flash = rnd() < 0.65; fx.hud = pick(['auto', 'auto', 'on', 'off']);
+  if (!fixedLook) {
+    fx.koma = pick(T && T.koma ? T.koma : { horror: [12, 8, 0], glitch: [12, 12, 8], pop: [12, 12, 8, 0], calm: [0, 0, 12], editorial: [0, 12], emotional: [12, 0], graphic: [12, 12, 0] }[mood] || [12, 8, 0]);
+    fx.onTwos = fx.koma > 0; fx.flash = rnd() < 0.65; fx.hud = pick(['auto', 'auto', 'on', 'off']);
+  }
   // technique subset per group: everything tagged with the mood (plus the mood's hand-picked core items),
   // a sprinkle of everything else, and a minimum count so the planner always has room to vary
   const enabled = {};
@@ -106,21 +115,37 @@ J.omakase = (project, rnd = Math.random, themeId = null) => {
   for (const k of (M.noHold || [])) if (enabled.hold[k] !== undefined) enabled.hold[k] = false;
   enabled.hold.still = true;
   // fonts: sometimes swap the headline / mincho faces for another catalogue face
-  const fonts = {};
-  const faces = Object.entries(J.FONTS).filter(([k, f]) => !f.user && !['mono', 'pixel'].includes(f.kind) && (!J.randomOk || J.randomOk(project, 'font', k)));
-  if (rnd() < 0.4) fonts.display = pick(faces.filter(([k, f]) => f.weight >= 700 || f.kind === 'display' || f.kind === 'round'))[0];
-  if (rnd() < 0.3) fonts.serif = pick(faces.filter(([k, f]) => f.kind === 'mincho' || f.kind === 'brush'))[0];
-  if (mood === 'chaos' && rnd() < 0.2) fonts.display = 'dot';
+  const fonts = fixedLook ? Object.assign({}, project.fonts || {}) : {};
+  if (!fixedLook) {
+    const faces = Object.entries(J.FONTS).filter(([k, f]) => !f.user && !['mono', 'pixel'].includes(f.kind) && (!J.randomOk || J.randomOk(project, 'font', k)));
+    if (rnd() < 0.4) fonts.display = pick(faces.filter(([k, f]) => f.weight >= 700 || f.kind === 'display' || f.kind === 'round'))[0];
+    if (rnd() < 0.3) fonts.serif = pick(faces.filter(([k, f]) => f.kind === 'mincho' || f.kind === 'brush'))[0];
+    if (mood === 'chaos' && rnd() < 0.2) fonts.display = 'dot';
+  }
   // colours: style palette most of the time, a fresh accent / ghost pair otherwise
-  const colors = Object.assign({}, project.colors, { enabled: false, accentOn: false });
-  if (rnd() < 0.38) {
+  const colors = fixedLook ? Object.assign({}, project.colors || {}) : Object.assign({}, project.colors, { enabled: false, accentOn: false });
+  if (!fixedLook && rnd() < 0.38) {
     const bg = J.STYLES[style].schemes[0].bg;
     Object.assign(colors, J.randomPalette(bg, rnd), { accentOn: true });
     delete colors.mode;
   }
   // keep locked lines, drop other per-line picks
   const overrides = {};
-  for (const [i, o] of Object.entries(project.overrides || {})) if (o.lock) overrides[i] = o; else if (o.cutTime) overrides[i] = { cutTime: o.cutTime };   // cut times are timing, not the look
-  return Object.assign({ mood, style, fx, enabled, fonts, colors, overrides, seed: Math.floor(rnd() * 1e9) }, switches);
+  if (fixedLook) Object.assign(overrides, project.overrides || {});
+  else for (const [i, o] of Object.entries(project.overrides || {})) if (o.lock) overrides[i] = o; else if (o.cutTime) overrides[i] = { cutTime: o.cutTime };   // cut times are timing, not the look
+  return fixedLook
+    ? Object.assign({}, project, { mood, fx, enabled, overrides, themeApplied: T ? themeId : null }, switches)
+    : Object.assign({ mood, style, fx, enabled, fonts, colors, overrides, seed: Math.floor(rnd() * 1e9), themeApplied: T ? themeId : null }, switches);
+};
+
+/* テーマの適用（SDK / スクリプト用）: 方向性（ムード・動き・技の repertoire）はテーマが決めるが、
+   外観（スタイル・色・書体・seed）は呼び出し側のまま。同じ seed なら同じ方向 — 再現性が要る
+   経路（プレビューと書き出しで同じ絵にする）では、テーマ適用のたびに別の結果になると困る。 */
+J.applyTheme = (project, themeId) => {
+  const T = themeId && J.THEMES && J.THEMES[themeId] ? J.THEMES[themeId] : null;
+  if (!T) return project;
+  const seed = project.seed != null ? project.seed : 20260922;
+  const rnd = J.rng(J.h ? J.h(seed, 777) : seed);
+  return J.omakase(Object.assign({}, project), rnd, themeId, { fixedLook: true });
 };
 })();
