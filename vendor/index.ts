@@ -176,8 +176,23 @@ export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
     await page.goto(`file://${RUNNER_HTML}`);
     await page.waitForFunction('() => window.__jizuraReady === true');
 
+    // Transfer backgrounds in chunks to avoid IPC payload limits (~100MB).
+    await page.evaluate(() => { (window as any).__jizuraBgAssets = []; });
+    for (const bg of backgroundsPrepared) {
+      await page.evaluate(({ type, name, base64, dur }) => {
+        const b64toAB = (b64: string) => {
+          const bin = atob(b64);
+          const len = bin.length;
+          const u8 = new Uint8Array(len);
+          for (let i = 0; i < len; i++) u8[i] = bin.charCodeAt(i);
+          return u8.buffer;
+        };
+        (window as any).__jizuraBgAssets.push({ type, name, data: b64toAB(base64), dur });
+      }, { type: bg.type, name: bg.name, base64: bg.base64, dur: bg.dur });
+    }
+
     const result = await page.evaluate(
-      async ({ audioB64, lyrics, config, backgrounds, quality, range, port }) => {
+      async ({ audioB64, lyrics, config, quality, range, port }) => {
         const b64toAB = (b64: string) => {
           const bin = atob(b64);
           const len = bin.length;
@@ -187,12 +202,7 @@ export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
         };
 
         const audioBuf = audioB64 ? b64toAB(audioB64) : null;
-        const bgAssets = backgrounds.map((b: { type: 'video' | 'image'; name: string; base64: string; dur?: number }) => ({
-          type: b.type,
-          name: b.name,
-          data: b64toAB(b.base64),
-          dur: b.dur,
-        }));
+        const bgAssets = (window as any).__jizuraBgAssets || [];
 
         const out = await (window as any).J.renderJob({
           audioBuffer: audioBuf,
@@ -218,6 +228,7 @@ export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
           throw new Error(`Failed to stream render to host: ${postRes.status} ${postRes.statusText}`);
         }
 
+        delete (window as any).__jizuraBgAssets;
         return {
           size: out.size,
           duration: out.duration,
@@ -232,7 +243,6 @@ export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
         audioB64: audioBase64,
         lyrics: job.lyrics,
         config: job.config || {},
-        backgrounds: backgroundsPrepared,
         quality: job.quality || 'high',
         range: job.range || null,
         port: localPort,
@@ -318,8 +328,22 @@ export async function snapshot(
     await page.goto(`file://${RUNNER_HTML}`);
     await page.waitForFunction('() => window.__jizuraReady === true');
 
+    await page.evaluate(() => { (window as any).__jizuraBgAssets = []; });
+    for (const bg of backgroundsPrepared) {
+      await page.evaluate(({ type, name, base64, dur }) => {
+        const b64toAB = (b64: string) => {
+          const bin = atob(b64);
+          const len = bin.length;
+          const u8 = new Uint8Array(len);
+          for (let i = 0; i < len; i++) u8[i] = bin.charCodeAt(i);
+          return u8.buffer;
+        };
+        (window as any).__jizuraBgAssets.push({ type, name, data: b64toAB(base64), dur });
+      }, { type: bg.type, name: bg.name, base64: bg.base64, dur: bg.dur });
+    }
+
     const dataUrl = await page.evaluate(
-      async ({ audioB64, lyrics, config, backgrounds, t, s }) => {
+      async ({ audioB64, lyrics, config, t, s }) => {
         const b64toAB = (b64: string) => {
           const bin = atob(b64);
           const len = bin.length;
@@ -328,12 +352,7 @@ export async function snapshot(
           return u8.buffer;
         };
         const audioBuf = audioB64 ? b64toAB(audioB64) : null;
-        const bgAssets = backgrounds.map((b: { type: 'video' | 'image'; name: string; base64: string; dur?: number }) => ({
-          type: b.type,
-          name: b.name,
-          data: b64toAB(b.base64),
-          dur: b.dur,
-        }));
+        const bgAssets = (window as any).__jizuraBgAssets || [];
 
         const prep = await (window as any).J.prepareJob({
           audioBuffer: audioBuf,
@@ -348,7 +367,6 @@ export async function snapshot(
         audioB64: audioBase64,
         lyrics: job.lyrics,
         config: job.config || {},
-        backgrounds: backgroundsPrepared,
         t: tSec,
         s: scale,
       }
