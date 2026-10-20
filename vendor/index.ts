@@ -60,7 +60,11 @@ function findChromiumPath(): string | undefined {
  * Executes a full JIZURA render job inside a headless Chromium instance.
  */
 export async function render(job: JizuraJobInput): Promise<JizuraJobResult> {
-  const { chromium } = await import('playwright');
+  // playwright-core primeiro: nao baixa navegador (o binario vem do cache do host).
+  // playwright e o fallback para quem installou o pacote completo.
+  const { chromium } = await (async () => {
+    try { return await import('playwright-core'); } catch { return await import('playwright'); }
+  })();
 
   if (!fs.existsSync(RUNNER_HTML)) {
     throw new Error(`Runner HTML not found at ${RUNNER_HTML}. Run python3 build.py --dev first.`);
@@ -289,7 +293,11 @@ export async function snapshot(
   tSec: number,
   scale = 0.5
 ): Promise<Buffer> {
-  const { chromium } = await import('playwright');
+  // playwright-core primeiro: nao baixa navegador (o binario vem do cache do host).
+  // playwright e o fallback para quem installou o pacote completo.
+  const { chromium } = await (async () => {
+    try { return await import('playwright-core'); } catch { return await import('playwright'); }
+  })();
   const execPath = findChromiumPath();
   const browser = await chromium.launch({
     headless: true,
