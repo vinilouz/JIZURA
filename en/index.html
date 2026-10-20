@@ -3461,6 +3461,7 @@ J.defaultProject = () => ({
   lang: 'auto',                   // 歌詞の言語: 'auto' | 'ja' | 'zh-Hant' | 'zh-Hans' | 'ko' — picks the faces each font key is drawn with
   keyBg: 'off',                   // 合成用の背景: 'off' | 'green' (グリーンバック) | 'black' (ブラックバック)
   unify: false,                   // 統一感: part palettes, repeats shown the same way, キメ, モーフ, 太さ
+  recap: true,                    // 頷き: a whole line is shown again at the end of that line (see plan)
   typeset: false,                 // 文字整列: kana tracking, small particles / big first character, Latin sizing, 0.2 s lead, restraint
   centerDir: 'tb',                // 中央を空ける on tall frames: 'tb' = top / bottom, 'lr' = left / right
   centerFree: false,              // 中央を空ける: lay the cuts out in side bands (left / right or top / bottom) around a character
@@ -3703,6 +3704,12 @@ function cutTechOf(ov, k) {
 }
 
 J.plan = (project, audio) => {
+  // The theme decides the direction (mood / motion / repertoire). What the caller fixed
+  // (style, colours, fonts, seed) stays. Same seed -> same direction, so the preview and the
+  // export show the same thing. themeApplied: already themed (the UI's おまかせ) -> leave it.
+  if (project.themeId && J.applyTheme && project.themeApplied !== project.themeId) {
+    project = J.applyTheme(project, project.themeId);
+  }
   const st = J.resolveStyle(project);
   const fx = Object.assign({}, J.defaultProject().fx, project.fx || {});
   const parsed = J.parseLyrics(project.lyrics);
@@ -3805,7 +3812,7 @@ J.plan = (project, audio) => {
     const nG = Math.min(nC, chunks2.length);
     if (nG <= 1) groups = [ln.text];
     else groups = partition(chunks2, nG).map(g => J.joinWords(g));
-    const recap = !fixedN && nC > groups.length && groups.length >= 2;
+    const recap = !fixedN && project.recap !== false && nC > groups.length && groups.length >= 2;
     let units = groups.map(g => ({ text: g, w: [...g].length + 1.6 }));
     if (recap) units.push({ text: ln.text, w: (units.reduce((a, u) => a + u.w, 0) / units.length) * 1.25, recap: true });
     // a locked line keeps its own cuts too (the cut count would otherwise follow the 細かさ slider or おまかせ)
@@ -4538,7 +4545,11 @@ J.THEMES = {
 };
 J.THEME_ORDER = Object.keys(J.THEMES);
 
-J.omakase = (project, rnd = Math.random, themeId = null) => {
+// opts.fixedLook: テーマは方向（ムード・動き・技の repertoire）だけを決める。
+// 外観（スタイル・色・書体・seed・上書き）は呼び出し側のまま — SDK/スクリプトから
+// 使うとき、テーマを当てても手元の貌を壊さないため。
+J.omakase = (project, rnd = Math.random, themeId = null, opts = {}) => {
+  const fixedLook = !!opts.fixedLook;
   const T = themeId && J.THEMES[themeId] ? J.THEMES[themeId] : null;
   const switches = {};
   if (T && T.set) switches[T.set] = true;
@@ -4556,17 +4567,22 @@ J.omakase = (project, rnd = Math.random, themeId = null) => {
   const moodSetOk = d => !(d && d.set) || !Object.values(J.MOODS).some(m => m.set === d.set) || M.set === d.set;
   // style: mostly one that suits the mood, sometimes anything; never the same twice in a row
   // (only styles the 追加分 / 和風 switches allow)
-  const okStyle = k => J.STYLES[k] && (!J.randomOk || J.randomOk(project, 'style', k)) && moodSetOk(J.STYLES[k]);
-  const moodStyles = [...new Set([...(M.styles || []), ...J.STYLE_ORDER.filter(k => (J.STYLES[k].moods || []).includes(mood))])].filter(okStyle);
-  let pool = (moodStyles.length && rnd() < 0.72 ? moodStyles : J.STYLE_ORDER.filter(okStyle)).filter(k => k !== project.style);
-  if (T) { const ts = J.STYLE_ORDER.filter(k => okStyle(k) && themePart(J.STYLES[k]) && k !== project.style); if (ts.length && rnd() < 0.8) pool = ts; }
-  if (!pool.length) pool = J.STYLE_ORDER.filter(k => k !== project.style && okStyle(k));
-  if (!pool.length) pool = J.STYLE_ORDER.filter(k => k !== project.style);
-  const style = pick(pool);
+  let style = project.style;
+  if (!fixedLook) {
+    const okStyle = k => J.STYLES[k] && (!J.randomOk || J.randomOk(project, 'style', k)) && moodSetOk(J.STYLES[k]);
+    const moodStyles = [...new Set([...(M.styles || []), ...J.STYLE_ORDER.filter(k => (J.STYLES[k].moods || []).includes(mood))])].filter(okStyle);
+    let pool = (moodStyles.length && rnd() < 0.72 ? moodStyles : J.STYLE_ORDER.filter(okStyle)).filter(k => k !== project.style);
+    if (T) { const ts = J.STYLE_ORDER.filter(k => okStyle(k) && themePart(J.STYLES[k]) && k !== project.style); if (ts.length && rnd() < 0.8) pool = ts; }
+    if (!pool.length) pool = J.STYLE_ORDER.filter(k => k !== project.style && okStyle(k));
+    if (!pool.length) pool = J.STYLE_ORDER.filter(k => k !== project.style);
+    style = pick(pool);
+  }
   const fx = Object.assign({}, project.fx);
   for (const k of Object.keys(M.fx)) fx[k] = range(M.fx[k]);
-  fx.koma = pick(T && T.koma ? T.koma : { horror: [12, 8, 0], glitch: [12, 12, 8], pop: [12, 12, 8, 0], calm: [0, 0, 12], editorial: [0, 12], emotional: [12, 0], graphic: [12, 12, 0] }[mood] || [12, 8, 0]);
-  fx.onTwos = fx.koma > 0; fx.flash = rnd() < 0.65; fx.hud = pick(['auto', 'auto', 'on', 'off']);
+  if (!fixedLook) {
+    fx.koma = pick(T && T.koma ? T.koma : { horror: [12, 8, 0], glitch: [12, 12, 8], pop: [12, 12, 8, 0], calm: [0, 0, 12], editorial: [0, 12], emotional: [12, 0], graphic: [12, 12, 0] }[mood] || [12, 8, 0]);
+    fx.onTwos = fx.koma > 0; fx.flash = rnd() < 0.65; fx.hud = pick(['auto', 'auto', 'on', 'off']);
+  }
   // technique subset per group: everything tagged with the mood (plus the mood's hand-picked core items),
   // a sprinkle of everything else, and a minimum count so the planner always has room to vary
   const enabled = {};
@@ -4592,22 +4608,38 @@ J.omakase = (project, rnd = Math.random, themeId = null) => {
   for (const k of (M.noHold || [])) if (enabled.hold[k] !== undefined) enabled.hold[k] = false;
   enabled.hold.still = true;
   // fonts: sometimes swap the headline / mincho faces for another catalogue face
-  const fonts = {};
-  const faces = Object.entries(J.FONTS).filter(([k, f]) => !f.user && !['mono', 'pixel'].includes(f.kind) && (!J.randomOk || J.randomOk(project, 'font', k)));
-  if (rnd() < 0.4) fonts.display = pick(faces.filter(([k, f]) => f.weight >= 700 || f.kind === 'display' || f.kind === 'round'))[0];
-  if (rnd() < 0.3) fonts.serif = pick(faces.filter(([k, f]) => f.kind === 'mincho' || f.kind === 'brush'))[0];
-  if (mood === 'chaos' && rnd() < 0.2) fonts.display = 'dot';
+  const fonts = fixedLook ? Object.assign({}, project.fonts || {}) : {};
+  if (!fixedLook) {
+    const faces = Object.entries(J.FONTS).filter(([k, f]) => !f.user && !['mono', 'pixel'].includes(f.kind) && (!J.randomOk || J.randomOk(project, 'font', k)));
+    if (rnd() < 0.4) fonts.display = pick(faces.filter(([k, f]) => f.weight >= 700 || f.kind === 'display' || f.kind === 'round'))[0];
+    if (rnd() < 0.3) fonts.serif = pick(faces.filter(([k, f]) => f.kind === 'mincho' || f.kind === 'brush'))[0];
+    if (mood === 'chaos' && rnd() < 0.2) fonts.display = 'dot';
+  }
   // colours: style palette most of the time, a fresh accent / ghost pair otherwise
-  const colors = Object.assign({}, project.colors, { enabled: false, accentOn: false });
-  if (rnd() < 0.38) {
+  const colors = fixedLook ? Object.assign({}, project.colors || {}) : Object.assign({}, project.colors, { enabled: false, accentOn: false });
+  if (!fixedLook && rnd() < 0.38) {
     const bg = J.STYLES[style].schemes[0].bg;
     Object.assign(colors, J.randomPalette(bg, rnd), { accentOn: true });
     delete colors.mode;
   }
   // keep locked lines, drop other per-line picks
   const overrides = {};
-  for (const [i, o] of Object.entries(project.overrides || {})) if (o.lock) overrides[i] = o; else if (o.cutTime) overrides[i] = { cutTime: o.cutTime };   // cut times are timing, not the look
-  return Object.assign({ mood, style, fx, enabled, fonts, colors, overrides, seed: Math.floor(rnd() * 1e9) }, switches);
+  if (fixedLook) Object.assign(overrides, project.overrides || {});
+  else for (const [i, o] of Object.entries(project.overrides || {})) if (o.lock) overrides[i] = o; else if (o.cutTime) overrides[i] = { cutTime: o.cutTime };   // cut times are timing, not the look
+  return fixedLook
+    ? Object.assign({}, project, { mood, fx, enabled, overrides, themeApplied: T ? themeId : null }, switches)
+    : Object.assign({ mood, style, fx, enabled, fonts, colors, overrides, seed: Math.floor(rnd() * 1e9), themeApplied: T ? themeId : null }, switches);
+};
+
+/* テーマの適用（SDK / スクリプト用）: 方向性（ムード・動き・技の repertoire）はテーマが決めるが、
+   外観（スタイル・色・書体・seed）は呼び出し側のまま。同じ seed なら同じ方向 — 再現性が要る
+   経路（プレビューと書き出しで同じ絵にする）では、テーマ適用のたびに別の結果になると困る。 */
+J.applyTheme = (project, themeId) => {
+  const T = themeId && J.THEMES && J.THEMES[themeId] ? J.THEMES[themeId] : null;
+  if (!T) return project;
+  const seed = project.seed != null ? project.seed : 20260922;
+  const rnd = J.rng(J.h ? J.h(seed, 777) : seed);
+  return J.omakase(Object.assign({}, project), rnd, themeId, { fixedLook: true });
 };
 })();
 
@@ -38196,12 +38228,13 @@ J.prepareJob = async ({ audioBuffer, lyrics, config = {}, backgrounds = [] }) =>
       const isVid = bg.type === 'video' || (bg.name && /\.(mp4|mov)$/i.test(bg.name));
       if (isVid) {
         const info = await J.video.open(id, bg.data);
-        const asset = { id, name: bg.name || 'clip.mp4', type: 'video/mp4', w: info.w, h: info.h, dur: info.dur };
+        // explicit dur wins: scene windows must not be derived from the decoded clip
+        const asset = { id, name: bg.name || 'clip.mp4', type: 'video/mp4', w: info.w, h: info.h, dur: bg.dur || info.dur };
         J.bgRegisterDirect(asset, null);
       } else {
         const blob = bg.data instanceof Blob ? bg.data : new Blob([bg.data]);
         const bmp = await createImageBitmap(blob);
-        const asset = { id, name: bg.name || 'image.png', type: 'image/png', w: bmp.width, h: bmp.height };
+        const asset = { id, name: bg.name || 'image.png', type: 'image/png', w: bmp.width, h: bmp.height, dur: bg.dur };
         J.bgRegisterDirect(asset, bmp);
       }
     }
@@ -38630,6 +38663,20 @@ J.bgForLine = (line) => {
   return list[((l % list.length) + list.length) % list.length];
 };
 
+/* The asset whose window covers tSec, walking all assets (images included) in order.
+   Returns null when any asset lacks `dur`, keeping the old reel/line rotation. */
+J.bgSceneAt = (tSec) => {
+  const list = assets();
+  if (!list.length) return null;
+  let acc = 0;
+  for (const a of list) {
+    if (!(a.dur > 0)) return null;
+    if (tSec >= acc && tSec < acc + a.dur) return { asset: a, local: Math.max(0, tSec - acc) };
+    acc += a.dur;
+  }
+  return { asset: list[list.length - 1], local: 0 };
+};
+
 /* Videos are one continuous reel that loops when the song is longer than the clips */
 J.bgVideoAt = (tSec) => {
   const reels = assets().filter(isVideo);
@@ -38649,7 +38696,8 @@ J.bgVideoAt = (tSec) => {
 /* Pre-synchronize video decoding before drawing a frame (used by export & snapshots) */
 J.ensureBgReady = async (tSec) => {
   if (typeof J.bgVideoAt !== 'function' || !J.video || typeof J.video.ready !== 'function') return;
-  const reel = J.bgVideoAt(tSec);
+  const sceneAt = J.bgSceneAt(tSec);
+  const reel = sceneAt && !isVideo(sceneAt.asset) ? null : (sceneAt || J.bgVideoAt(tSec));
   if (reel && reel.asset) {
     await J.video.ready(reel.asset.id, reel.local, 0);
   }
@@ -38756,8 +38804,9 @@ const drawMedia = env => {
   if (!list.length) return;                    // nothing loaded: the editor background stays as it is
   const cut = env.cut;
   if (!cut) throw new Error('99_custom_bgs: background media needs a cut to rotate over');
-  const reel = J.bgVideoAt(env.t);
-  const asset = reel ? reel.asset : J.bgForLine(cut.line);
+  const sceneAt = J.bgSceneAt(env.t);
+  const reel = sceneAt && !isVideo(sceneAt.asset) ? null : (sceneAt || J.bgVideoAt(env.t));
+  const asset = reel ? reel.asset : (sceneAt ? sceneAt.asset : J.bgForLine(cut.line));
   const vid = isVideo(asset);
   // the preview canvas is the one on screen; the export builds its own, detached
   const live = env.ctx.canvas.isConnected;
