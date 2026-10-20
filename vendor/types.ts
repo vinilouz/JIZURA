@@ -62,6 +62,21 @@ export interface JizuraFxConfig {
   hideTime?: boolean;
 }
 
+/**
+ * Colour overrides on top of the style palette: `enabled` swaps bg/fg/sub, `accentOn`
+ * re-lights the accent and the chromatic ghosts on every scheme.
+ */
+export interface JizuraColorOverride {
+  enabled?: boolean;
+  accentOn?: boolean;
+  bg?: string;
+  fg?: string;
+  sub?: string;
+  accent?: string;
+  ghostA?: string;
+  ghostB?: string;
+}
+
 export interface JizuraProjectConfig {
   title?: string;
   artist?: string;
@@ -71,6 +86,8 @@ export interface JizuraProjectConfig {
   themeId?: string | null;
   /** Show the whole line again at the end of that line (the recap cut). Default true. */
   recap?: boolean;
+  /** Palette overrides on top of the style (see JizuraColorOverride). */
+  colors?: JizuraColorOverride;
   seed?: number;
   aspect?: '16:9' | '9:16' | '1:1' | '4:3' | '3:4' | '4:5' | '21:9';
   res?: number;
