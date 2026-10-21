@@ -39468,6 +39468,18 @@ J.plan = (project, audio) => {
         const v = must(id);
         if (v.fail) { pending = v.fail; throw v.fail; }
         const us = Math.round(tSec * 1e6);
+        const i0 = indexAt(v.t, us);
+        const decoded0 = v.outputs.get(v.t.ts[i0]);
+        // A frame that is already decoded is used as it is. The cut-to-cut transition renders
+        // the previous frame again, and seeking back for it resets the decoder mid-stream:
+        // the decoder then re-feeds the whole window on every frame of the transition and
+        // ends the export with a decoding error.
+        if (decoded0) {
+          if (us > v.playhead) v.playhead = us;
+          pump(v);
+          evict(v, us);
+          return decoded0;
+        }
         if (v.playhead < 0 || us < v.playhead || us > v.playhead + SEEK_JUMP_US) seek(v, us);
         v.playhead = us;
         pump(v);
