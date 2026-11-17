@@ -156,8 +156,9 @@ J.resolveStyle = (project) => {
   const base = J.STYLES[project.style] || J.STYLES.noir;
   const st = JSON.parse(JSON.stringify(base));
   const ov = project.colors || {};
-  // base colours (background / text) replace the main scheme only
-  if (ov.enabled) st.schemes[0] = Object.assign({}, st.schemes[0], pickDefined(ov, ['bg', 'fg', 'sub']));
+  // base colours (background / text) replace every scheme, so the per-cut scheme
+  // rotation cannot resurrect the style's own palette after the user picked colours
+  if (ov.enabled) st.schemes = st.schemes.map(s => Object.assign({}, s, pickDefined(ov, ['bg', 'fg', 'sub'])));
   // accent + chromatic ghost colours apply to every scheme; accent is re-lit per background for contrast
   if (ov.accentOn) {
     st.schemes = st.schemes.map(s => {
